@@ -1,0 +1,26 @@
+{% extends "tracker/base.html" %} {% block title %}QR Code Gerado - {{
+lote.nome_lote }}{% endblock %} {% block content %}
+<h1>Lote "{{ lote.nome_lote }}" Salvo com Sucesso!</h1>
+<p><strong>ID do Lote:</strong> {{ lote.id }}</p>
+
+<div class="qr-code-container">
+    <h2>QR Code para o Cliente:</h2>
+    <img
+        src="{{ qr_code_data_uri }}"
+        alt="QR Code para o lote {{ lote.nome_lote }}"
+    />
+</div>
+
+<p>
+    <strong>Link para o cliente:</strong>
+    <a href="{{ qr_code_url }}" target="_blank">{{ qr_code_url }}</a>
+</p>
+<p style="margin-top: 20px">
+    <a href="{% url 'tracker:cadastrar_lote' %}" class="btn btn-primary"
+        >Cadastrar Outro Lote</a
+    >
+    <a href="{% url 'tracker:home_vinicola' %}" class="btn btn-secondary"
+        >Voltar para Home</a
+    >
+</p>
+{% endblock %}
