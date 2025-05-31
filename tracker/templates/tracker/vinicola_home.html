@@ -1,6 +1,5 @@
-{% extends "tracker/base.html" %} {% block title %}Painel da Vinícola 
-{%endblock %} 
-{% block content %}
+{% extends "tracker/base.html" %} {% block title %} Painel da Vinícola
+{%endblock%} {% block content %}
 <h1>Painel da Vinícola</h1>
 <p>Bem-vindo, {{ user.username|default:'Usuário' }}!</p>
 <a href="{% url 'tracker:cadastrar_lote' %}" class="btn btn-primary"
@@ -12,9 +11,9 @@
 <ul>
     {% for lote in lotes_recentes %}
     <li>
-        <a href="{{ lote.get_absolute_url }}">{{ lote.nome_lote }}</a> (ID: {{
-        lote.id }}) - Cadastrado em: {{ lote.timestamp_criacao|date:"d/m/Y H:i"
-        }}
+        <a href="{{ lote.get_absolute_url }}">{{ lote.nome_lote }}</a>
+        (ID: {{lote.id }}) - Cadastrado em:
+        {{lote.timestamp_criacao|date:"d/m/YH:i" }}
         <br />
         <small
             ><a href="{% url 'tracker:mostrar_qr_code' batch_id=lote.id %}"

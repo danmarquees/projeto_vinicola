@@ -1,5 +1,5 @@
 from django import forms
-from .models import LoteDeVinho
+from .models import LoteDeVinho, AvaliacaoCliente
 
 class LoteDeVinhoForm(forms.ModelForm):
     class Meta:
@@ -33,4 +33,17 @@ class LoteDeVinhoForm(forms.ModelForm):
         help_texts = {
             'data_colheita': 'Selecione a data em que as uvas foram colhidas.',
             # Adicione outros textos de ajuda
+        }
+
+class AvaliacaoClienteForm(forms.ModelForm):
+    class Meta:
+        model = AvaliacaoCliente
+        fields = ['estrelas', 'comentario']
+        widgets = {
+            'estrelas': forms.RadioSelect(choices=[(i, str(i)) for i in range(1, 6)]), # Renderiza estrelas como radio buttons
+            'comentario': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Deixe seu comentário sobre o vinho (opcional)...'}),
+        }
+        labels = {
+            'estrelas': 'Sua avaliação (1 a 5 estrelas)',
+            'comentario': 'Comentário',
         }
