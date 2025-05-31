@@ -1,0 +1,47 @@
+{% extends "tracker/base.html" %} {% block title %}Painel da Vinícola 
+{%endblock %} 
+{% block content %}
+<h1>Painel da Vinícola</h1>
+<p>Bem-vindo, {{ user.username|default:'Usuário' }}!</p>
+<a href="{% url 'tracker:cadastrar_lote' %}" class="btn btn-primary"
+    >Cadastrar Novo Lote de Vinho</a
+>
+
+<h2 style="margin-top: 2rem">Lotes Recentes Cadastrados:</h2>
+{% if lotes_recentes %}
+<ul>
+    {% for lote in lotes_recentes %}
+    <li>
+        <a href="{{ lote.get_absolute_url }}">{{ lote.nome_lote }}</a> (ID: {{
+        lote.id }}) - Cadastrado em: {{ lote.timestamp_criacao|date:"d/m/Y H:i"
+        }}
+        <br />
+        <small
+            ><a href="{% url 'tracker:mostrar_qr_code' batch_id=lote.id %}"
+                >Ver QR Code</a
+            ></small
+        >
+    </li>
+    {% endfor %}
+</ul>
+{% if page_obj %}
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; primeira</a>
+        <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+        {% endif %}
+
+        <span class="current">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">próxima</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+{% endif %} {% else %}
+<p>Nenhum lote cadastrado ainda.</p>
+{% endif %} {% endblock %}

@@ -1,0 +1,94 @@
+{% extends "tracker/base.html" %} {% block title %}Detalhes do Vinho: {{
+lote.nome_lote }}{% endblock %} {% block content %}
+<div style="text-align: center; margin-bottom: 2rem">
+    <h1>{{ lote.nome_lote }}</h1>
+    <p class="lead"><em>{{ lote.variedade_uva }}</em></p>
+</div>
+
+<h2>Informações do Lote</h2>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem">
+    {% if lote.id %}
+    <tr>
+        <td style="padding: 8px; border: 1px solid #ddd; width: 30%">
+            <strong>ID do Lote:</strong>
+        </td>
+        <td style="padding: 8px; border: 1px solid #ddd">{{ lote.id }}</td>
+    </tr>
+    {% endif %} {% if lote.quantidade_produzida %}
+    <tr>
+        <td style="padding: 8px; border: 1px solid #ddd">
+            <strong>Produção:</strong>
+        </td>
+        <td style="padding: 8px; border: 1px solid #ddd">
+            {{ lote.quantidade_produzida }} garrafas
+        </td>
+    </tr>
+    {% endif %}
+</table>
+
+<h2>Jornada do Vinho</h2>
+<ul style="list-style-type: none; padding-left: 0">
+    {% if lote.data_colheita %}
+    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+            >🍇</span
+        >
+        <strong>Colheita das Uvas:</strong> {{ lote.data_colheita|date:"d/m/Y"
+        }} {% if lote.origem_vinhedo %}<br /><small
+            ><em>Origem: {{ lote.origem_vinhedo }}</em></small
+        >{% endif %}
+    </li>
+    {% endif %} {% if lote.data_chegada_uvas %}
+    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+            >🚚</span
+        >
+        <strong>Chegada das Uvas na Vinícola:</strong> {{
+        lote.data_chegada_uvas|date:"d/m/Y" }}
+    </li>
+    {% endif %} {% if lote.detalhes_fermentacao %}
+    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+            >⚗️</span
+        >
+        <strong>Detalhes da Fermentação:</strong><br />{{
+        lote.detalhes_fermentacao|linebreaksbr }}
+    </li>
+    {% endif %} {% if lote.processo_envelhecimento %}
+    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+            >🏺</span
+        >
+        <strong>Processo de Envelhecimento:</strong><br />{{
+        lote.processo_envelhecimento|linebreaksbr }}
+    </li>
+    {% endif %} {% if lote.data_engarrafamento %}
+    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+            >🍾</span
+        >
+        <strong>Data de Engarrafamento:</strong> {{
+        lote.data_engarrafamento|date:"d/m/Y" }}
+    </li>
+    {% endif %} {% if lote.data_lancamento %}
+    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+            >🏪</span
+        >
+        <strong>Chegada às Prateleiras:</strong> {{
+        lote.data_lancamento|date:"d/m/Y" }}
+    </li>
+    {% endif %}
+</ul>
+
+{% if lote.notas_degustacao %}
+<div style="margin-top: 2rem">
+    <h2>Notas de Degustação</h2>
+    <p>{{ lote.notas_degustacao|linebreaksbr }}</p>
+</div>
+{% endif %} {% if lote.informacoes_adicionais %}
+<div style="margin-top: 2rem">
+    <h2>Informações Adicionais</h2>
+    <p>{{ lote.informacoes_adicionais|linebreaksbr }}</p>
+</div>
+{% endif %} {% endblock %}
