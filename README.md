@@ -170,3 +170,16 @@ python manage.py runserver 8080
   * **Erro de Migração (`no such table`)**: Certifique-se de ter rodado `makemigrations` e `migrate`.
   * **Erro 404 (Página Não Encontrada)**: Verifique se as URLs estão configuradas corretamente.
   * **Arquivos Estáticos não carregam**: Certifique-se de que `DEBUG=True` está no `settings.py`. Para produção, use ferramentas como Whitenoise.
+-----
+## Atualizações
+
+**31/05/2025**
+
+**Funcionalidades para o Cliente Final**
+
+Atualmente, o cliente pode visualizar os detalhes do lote. Que tal aprimorar essa experiência?
+Página de Feedback e Avaliação: Permita que os clientes avaliem o vinho e deixem comentários diretamente na página de detalhes do lote. Isso pode fornecer insights valiosos para a vinícola e aumentar o engajamento.
+* **Informações de Harmonização e Consumo:** Adicione sugestões de harmonização de alimentos, temperatura ideal de serviço e dicas de armazenamento para cada tipo de vinho.
+* **Conteúdo Multimídia:** Integre vídeos curtos da vinícola, do processo de produção ou da história da uva. Isso pode criar uma conexão mais profunda com o produto.
+* **Integração com Redes Sociais:** Permita que os clientes compartilhem a página do vinho diretamente em suas redes sociais, impulsionando a divulgação orgânica.
+
