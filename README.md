@@ -183,3 +183,12 @@ Página de Feedback e Avaliação: Permita que os clientes avaliem o vinho e dei
 * **Conteúdo Multimídia:** Integre vídeos curtos da vinícola, do processo de produção ou da história da uva. Isso pode criar uma conexão mais profunda com o produto.
 * **Integração com Redes Sociais:** Permita que os clientes compartilhem a página do vinho diretamente em suas redes sociais, impulsionando a divulgação orgânica.
 
+**03/06/2025**
+
+**Gestão Avançada para a Vinícola**
+
+O painel da vinícola está muito mais robusto.
+* **Dashboards e Relatórios:** Painéis visuais criados com dados sobre os lotes mais escaneados, a localização dos clientes que escanearam os QR Codes (se a coleta de dados de localização for implementada e consentida), e tendências de consumo.
+* **Gestão de Estoque e Alertas:** Implementado um módulo de controle de estoque que se integre aos lotes. A vinícola poderia receber alertas automáticos quando um lote está acabando.
+* **Edição e Atualização de Lotes:** Além do cadastro, permite que a vinícola edite informações de lotes existentes, como notas de degustação atualizadas ou informações adicionais.
+* **Histórico de Produção Detalhado:** Adicionado campos para registrar eventos específicos durante a produção, como data de engarrafamento, tipo de rolha, tempo de barrica, etc. Isso aprofundaria a rastreabilidade.
