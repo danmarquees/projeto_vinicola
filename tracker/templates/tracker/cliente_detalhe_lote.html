@@ -1,330 +1,433 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Detalhes do Vinho: {{ lote.nome_vinho }}</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                margin: 20px;
-                background-color: #f4f4f4;
-                color: #333;
-            }
-            .container {
-                max-width: 800px;
-                margin: auto;
-                background: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
-            h1,
-            h2 {
-                color: #800000;
-            } /* Cor vinho */
-            .info-section {
-                margin-bottom: 20px;
-                border-bottom: 1px solid #eee;
-                padding-bottom: 15px;
-            }
-            .info-section:last-child {
-                border-bottom: none;
-            }
-            .rating-stars {
-                color: #ffd700; /* Cor dourada para estrelas */
-            }
-            .form-avaliacao label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-            .form-avaliacao input[type="radio"] {
-                margin-right: 5px;
-            }
-            .form-avaliacao textarea {
-                width: 100%;
-                padding: 8px;
-                margin-top: 5px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-            }
-            .form-avaliacao button {
-                background-color: #800000;
-                color: white;
-                padding: 10px 15px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 16px;
-                margin-top: 10px;
-            }
-            .form-avaliacao button:hover {
-                background-color: #600000;
-            }
-            .avaliacao-item {
-                background-color: #f9f9f9;
-                border: 1px solid #eee;
-                padding: 10px;
-                margin-bottom: 10px;
-                border-radius: 5px;
-            }
-            .avaliacao-item p {
-                margin: 5px 0;
-            }
-            .social-share a {
-                display: inline-block;
-                margin-right: 10px;
-                text-decoration: none;
-                color: #800000;
-                font-weight: bold;
-            }
-            .social-share a:hover {
-                text-decoration: underline;
-            }
-            .video-container {
-                position: relative;
-                padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-                height: 0;
-                overflow: hidden;
-                max-width: 100%;
-                background: #000;
-                margin-bottom: 20px;
-            }
-            .video-container iframe,
-            .video-container object,
-            .video-container embed {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Detalhes do Vinho: {{ lote.nome_vinho }}</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detalhes do Vinho: {{ lote.nome_vinho }}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #800000;
+      } /* Cor vinho */
+      .info-section {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+      }
+      .info-section:last-child {
+        border-bottom: none;
+      }
+      .rating-stars {
+        color: #ffd700; /* Cor dourada para estrelas */
+      }
+      .form-avaliacao label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .form-avaliacao input[type="radio"] {
+        margin-right: 5px;
+      }
+      .form-avaliacao textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .form-avaliacao button {
+        background-color: #800000;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+      .form-avaliacao button:hover {
+        background-color: #600000;
+      }
+      .avaliacao-item {
+        background-color: #f9f9f9;
+        border: 1px solid #eee;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+      .avaliacao-item p {
+        margin: 5px 0;
+      }
+      .social-share a {
+        display: inline-block;
+        margin-right: 10px;
+        text-decoration: none;
+        color: #800000;
+        font-weight: bold;
+      }
+      .social-share a:hover {
+        text-decoration: underline;
+      }
+      .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+        background: #000;
+        margin-bottom: 20px;
+      }
+      .video-container iframe,
+      .video-container object,
+      .video-container embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Detalhes do Vinho: {{ lote.nome_vinho }}</h1>
 
-            <div class="info-section">
-                <p><strong>Safra:</strong> {{ lote.safra }}</p>
-                <p><strong>Vinícola:</strong> {{ lote.vinicola }}</p>
-                <p><strong>Região:</strong> {{ lote.regiao }}</p>
-                <p><strong>Uva:</strong> {{ lote.uva }}</p>
-                <p>
-                    <strong>Data de Produção:</strong> {{
-                    lote.data_producao|date:"d/m/Y" }}
-                </p>
-                <p><strong>Descrição:</strong> {{ lote.descricao }}</p>
-            </div>
+      <div class="info-section">
+        <p><strong>Safra:</strong> {{ lote.safra }}</p>
+        <p><strong>Vinícola:</strong> {{ lote.vinicola }}</p>
+        <p><strong>Região:</strong> {{ lote.regiao }}</p>
+        <p><strong>Uva:</strong> {{ lote.uva }}</p>
+        <p>
+          <strong>Data de Produção:</strong> {{ lote.data_producao|date:"d/m/Y" }}
+        </p>
+        <p><strong>Descrição:</strong> {{ lote.descricao }}</p>
+      </div>
 
-            <div class="info-section">
-                <h2>Informações Adicionais para o Consumidor</h2>
-                {% if lote.harmonizacao %}
-                <p>
-                    <strong>Sugestões de Harmonização:</strong> {{
-                    lote.harmonizacao }}
-                </p>
-                {% else %}
-                <p>Nenhuma sugestão de harmonização disponível.</p>
-                {% endif %} {% if lote.temperatura_servico %}
-                <p>
-                    <strong>Temperatura Ideal para Servir:</strong> {{
-                    lote.temperatura_servico }}
-                </p>
-                {% else %}
-                <p>Nenhuma informação de temperatura disponível.</p>
-                {% endif %} {% if lote.dicas_armazenamento %}
-                <p>
-                    <strong>Dicas de Armazenamento:</strong> {{
-                    lote.dicas_armazenamento }}
-                </p>
-                {% else %}
-                <p>Nenhuma dica de armazenamento disponível.</p>
-                {% endif %}
-            </div>
+      <div class="info-section">
+        <h2>Informações Adicionais para o Consumidor</h2>
+        {% if lote.harmonizacao %}
+        <p>
+          <strong>Sugestões de Harmonização:</strong> {{ lote.harmonizacao }}
+        </p>
+        {% else %}
+        <p>Nenhuma sugestão de harmonização disponível.</p>
+        {% endif %} {% if lote.temperatura_servico %}
+        <p>
+          <strong>Temperatura Ideal para Servir:</strong> {{
+          lote.temperatura_servico }}
+        </p>
+        {% else %}
+        <p>Nenhuma informação de temperatura disponível.</p>
+        {% endif %} {% if lote.dicas_armazenamento %}
+        <p>
+          <strong>Dicas de Armazenamento:</strong> {{ lote.dicas_armazenamento
+          }}
+        </p>
+        {% else %}
+        <p>Nenhuma dica de armazenamento disponível.</p>
+        {% endif %}
+      </div>
 
-            {% if lote.link_video_producao %}
-            <div class="info-section">
-                <h2>Conheça a Produção</h2>
-                <div class="video-container">
-                    {# Assume que é um link embedável do YouTube ou Vimeo. Você
-                    pode precisar de lógica mais robusta para outros hosts. #}
-                    {# Exemplo de link do YouTube:
-                    https://www.youtube.com/embed/VIDEO_ID #} {# Exemplo de link
-                    do Vimeo: https://player.vimeo.com/video/VIDEO_ID #}
-                    <iframe
-                        src="{{ lote.link_video_producao }}"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                    ></iframe>
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="info-section">
-                <h2>
-                    Avaliações dos Clientes (Média:
-                    <span class="rating-stars"
-                        >{{ media_estrelas }} &#9733;</span
-                    >)
-                </h2>
-                {% if avaliacoes %} {% for avaliacao in avaliacoes %}
-                <div class="avaliacao-item">
-                    <p>
-                        <strong>Avaliação:</strong> {{ avaliacao.estrelas }}
-                        <span class="rating-stars">&#9733;</span>
-                    </p>
-                    {% if avaliacao.comentario %}
-                    <p>{{ avaliacao.comentario }}</p>
-                    {% endif %}
-                    <small
-                        >Avaliado em: {{ avaliacao.data_avaliacao|date:"d/m/Y
-                        H:i" }}</small
-                    >
-                </div>
-                {% endfor %} {% else %}
-                <p>
-                    Ainda não há avaliações para este vinho. Seja o primeiro a
-                    avaliar!
-                </p>
-                {% endif %}
-
-                <h3>Deixe sua Avaliação</h3>
-                <form method="post" class="form-avaliacao">
-                    {% csrf_token %} {{ form_avaliacao.as_p }} {# Renderiza o
-                    formulário como parágrafos #}
-                    <button type="submit">Enviar Avaliação</button>
-                </form>
-            </div>
-
-            {% if lote.link_rede_social_vinicola %}
-            <div class="info-section social-share">
-                <h2>Siga a Vinícola</h2>
-                <a href="{{ lote.link_rede_social_vinicola }}" target="_blank"
-                    >Visite nossa Rede Social</a
-                >
-            </div>
-            {% endif %}
-
-            <div class="info-section social-share">
-                <h2>Compartilhe este Vinho</h2>
-                {# Links de compartilhamento genéricos. Você pode personalizar
-                para redes específicas. #}
-                <a
-                    href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
-                    target="_blank"
-                    >Compartilhar no Facebook</a
-                >
-                <a
-                    href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text=Experimentei%20o%20vinho%20{{ lote.nome_vinho }}%20-%20Confira!"
-                    target="_blank"
-                    >Compartilhar no Twitter</a
-                >
-                <a
-                    href="https://api.whatsapp.com/send?text=Confira%20este%20vinho:%20{{ lote.nome_vinho }}%20-%20{{ request.build_absolute_uri }}"
-                    target="_blank"
-                    >Compartilhar no WhatsApp</a
-                >
-                {# Para outras redes, adapte os URLs de compartilhamento #}
-            </div>
+      {% if lote.link_video_producao %}
+      <div class="info-section">
+        <h2>Conheça a Produção</h2>
+        <div class="video-container">
+          {# Assume que é um link embedável do YouTube ou Vimeo. Você pode
+          precisar de lógica mais robusta para outros hosts. #} {# Exemplo de
+          link do YouTube: https://www.youtube.com/embed/VIDEO_ID #} {# Exemplo
+          de link do Vimeo: https://player.vimeo.com/video/VIDEO_ID #}
+          <iframe
+            src="{{ lote.link_video_producao }}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
         </div>
-    </body>
+      </div>
+      {% endif %}
+
+      <div class="info-section">
+        <h2>
+          Avaliações dos Clientes (Média:
+          <span class="rating-stars">{{ media_estrelas }} &#9733;</span>)
+        </h2>
+        {% if avaliacoes %} {% for avaliacao in avaliacoes %}
+        <div class="avaliacao-item">
+          <p>
+            <strong>Avaliação:</strong> {{ avaliacao.estrelas }}
+            <span class="rating-stars">&#9733;</span>
+          </p>
+          {% if avaliacao.comentario %}
+          <p>{{ avaliacao.comentario }}</p>
+          {% endif %}
+          <small
+            >Avaliado em: {{ avaliacao.data_avaliacao|date:"d/m/Y H:i" }}</small
+          >
+        </div>
+        {% endfor %} {% else %}
+        <p>
+          Ainda não há avaliações para este vinho. Seja o primeiro a avaliar!
+        </p>
+        {% endif %}
+
+        <h3>Deixe sua Avaliação</h3>
+        <form method="post" class="form-avaliacao">
+          {% csrf_token %} {{ form_avaliacao.as_p }} {# Renderiza o formulário
+          como parágrafos #}
+          <button type="submit">Enviar Avaliação</button>
+        </form>
+      </div>
+
+      {% if lote.link_rede_social_vinicola %}
+      <div class="info-section social-share">
+        <h2>Siga a Vinícola</h2>
+        <a href="{{ lote.link_rede_social_vinicola }}" target="_blank"
+          >Visite nossa Rede Social</a
+        >
+      </div>
+      {% endif %}
+
+      <div class="info-section social-share">
+        <h2>Compartilhe este Vinho</h2>
+        {# Links de compartilhamento genéricos. Você pode personalizar para
+        redes específicas. #}
+        <a
+          href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+          target="_blank"
+          >Compartilhar no Facebook</a
+        >
+        <a
+          href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text=Experimentei%20o%20vinho%20{{ lote.nome_vinho }}%20-%20Confira!"
+          target="_blank"
+          >Compartilhar no Twitter</a
+        >
+        <a
+          href="https://api.whatsapp.com/send?text=Confira%20este%20vinho:%20{{ lote.nome_vinho }}%20-%20{{ request.build_absolute_uri }}"
+          target="_blank"
+          >Compartilhar no WhatsApp</a
+        >
+        {# Para outras redes, adapte os URLs de compartilhamento #}
+      </div>
+    </div>
+  </body>
 </html>
 {% extends "tracker/base.html" %} {% block title %}Detalhes do
 Vinho:{{lote.nome_lote }}{% endblock %} {% block content %}
 <div style="text-align: center; margin-bottom: 2rem">
-    <h1>{{ lote.nome_lote }}</h1>
-    <p class="lead"><em>{{ lote.variedade_uva }}</em></p>
+  <h1>{{ lote.nome_lote }}</h1>
+  <p class="lead"><em>{{ lote.variedade_uva }}</em></p>
 </div>
 
 <h2>Informações do Lote</h2>
 <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem">
-    {% if lote.id %}
-    <tr>
-        <td style="padding: 8px; border: 1px solid #ddd; width: 30%">
-            <strong>ID do Lote:</strong>
-        </td>
-        <td style="padding: 8px; border: 1px solid #ddd">{{ lote.id }}</td>
-    </tr>
-    {% endif %} {% if lote.quantidade_produzida %}
-    <tr>
-        <td style="padding: 8px; border: 1px solid #ddd">
-            <strong>Produção:</strong>
-        </td>
-        <td style="padding: 8px; border: 1px solid #ddd">
-            {{ lote.quantidade_produzida }} garrafas
-        </td>
-    </tr>
-    {% endif %}
+  {% if lote.id %}
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd; width: 30%">
+      <strong>ID do Lote:</strong>
+    </td>
+    <td style="padding: 8px; border: 1px solid #ddd">{{ lote.id }}</td>
+  </tr>
+  {% endif %} {% if lote.quantidade_produzida %}
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd">
+      <strong>Produção:</strong>
+    </td>
+    <td style="padding: 8px; border: 1px solid #ddd">
+      {{ lote.quantidade_produzida }} garrafas
+    </td>
+  </tr>
+  {% endif %}
 </table>
 
 <h2>Jornada do Vinho</h2>
 <ul style="list-style-type: none; padding-left: 0">
-    {% if lote.data_colheita %}
-    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
-        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
-            >🍇</span
-        >
-        <strong>Colheita das Uvas:</strong> {{ lote.data_colheita|date:"d/m/Y"
-        }} {% if lote.origem_vinhedo %}<br /><small
-            ><em>Origem: {{ lote.origem_vinhedo }}</em></small
-        >{% endif %}
-    </li>
-    {% endif %} {% if lote.data_chegada_uvas %}
-    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
-        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
-            >🚚</span
-        >
-        <strong>Chegada das Uvas na Vinícola:</strong> {{
-        lote.data_chegada_uvas|date:"d/m/Y" }}
-    </li>
-    {% endif %} {% if lote.detalhes_fermentacao %}
-    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
-        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
-            >⚗️</span
-        >
-        <strong>Detalhes da Fermentação:</strong><br />{{
-        lote.detalhes_fermentacao|linebreaksbr }}
-    </li>
-    {% endif %} {% if lote.processo_envelhecimento %}
-    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
-        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
-            >🏺</span
-        >
-        <strong>Processo de Envelhecimento:</strong><br />{{
-        lote.processo_envelhecimento|linebreaksbr }}
-    </li>
-    {% endif %} {% if lote.data_engarrafamento %}
-    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
-        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
-            >🍾</span
-        >
-        <strong>Data de Engarrafamento:</strong> {{
-        lote.data_engarrafamento|date:"d/m/Y" }}
-    </li>
-    {% endif %} {% if lote.data_lancamento %}
-    <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
-        <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
-            >🏪</span
-        >
-        <strong>Chegada às Prateleiras:</strong> {{
-        lote.data_lancamento|date:"d/m/Y" }}
-    </li>
-    {% endif %}
+  {% if lote.data_colheita %}
+  <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🍇</span
+    >
+    <strong>Colheita das Uvas:</strong> {{ lote.data_colheita|date:"d/m/Y" }} {%
+    if lote.origem_vinhedo %}<br /><small
+      ><em>Origem: {{ lote.origem_vinhedo }}</em></small
+    >{% endif %}
+  </li>
+  {% endif %} {% if lote.data_chegada_uvas %}
+  <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🚚</span
+    >
+    <strong>Chegada das Uvas na Vinícola:</strong> {{
+    lote.data_chegada_uvas|date:"d/m/Y" }}
+  </li>
+  {% endif %} {% if lote.detalhes_fermentacao %}
+  <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >⚗️</span
+    >
+    <strong>Detalhes da Fermentação:</strong><br />{{
+    lote.detalhes_fermentacao|linebreaksbr }}
+  </li>
+  {% endif %} {% if lote.processo_envelhecimento %}
+  <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🏺</span
+    >
+    <strong>Processo de Envelhecimento:</strong><br />{{
+    lote.processo_envelhecimento|linebreaksbr }}
+  </li>
+  {% endif %} {% if lote.data_engarrafamento %}
+  <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🍾</span
+    >
+    <strong>Data de Engarrafamento:</strong> {{
+    lote.data_engarrafamento|date:"d/m/Y" }}
+  </li>
+  {% endif %} {% if lote.data_lancamento %}
+  <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🏪</span
+    >
+    <strong>Chegada às Prateleiras:</strong> {{
+    lote.data_lancamento|date:"d/m/Y" }}
+  </li>
+  {% endif %}
 </ul>
 
 {% if lote.notas_degustacao %}
 <div style="margin-top: 2rem">
-    <h2>Notas de Degustação</h2>
-    <p>{{ lote.notas_degustacao|linebreaksbr }}</p>
+  <h2>Notas de Degustação</h2>
+  <p>{{ lote.notas_degustacao|linebreaksbr }}</p>
 </div>
 {% endif %} {% if lote.informacoes_adicionais %}
 <div style="margin-top: 2rem">
-    <h2>Informações Adicionais</h2>
-    <p>{{ lote.informacoes_adicionais|linebreaksbr }}</p>
+  <h2>Informações Adicionais</h2>
+  <p>{{ lote.informacoes_adicionais|linebreaksbr }}</p>
 </div>
-{% endif %} {% endblock %}
+{% endif %}
+
+<div style="text-align: center; margin-bottom: 2rem">
+  <h1>{{ lote.nome_lote }}</h1>
+  <p class="lead"><em>{{ lote.variedade_uva }}</em></p>
+</div>
+
+<h2>Informações do Lote</h2>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem">
+  {% if lote.id %}
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd; width: 30%">
+      <strong>ID do Lote:</strong>
+    </td>
+    <td style="padding: 8px; border: 1px solid #ddd">{{ lote.id }}</td>
+  </tr>
+  {% endif %} {% if lote.quantidade_produzida_inicial %}
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd">
+      <strong>Produção Inicial:</strong>
+    </td>
+    <td style="padding: 8px; border: 1px solid #ddd">
+      {{ lote.quantidade_produzida_inicial }} garrafas
+    </td>
+  </tr>
+  {% endif %} {% if lote.data_lancamento %}
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd">
+      <strong>Disponível desde:</strong>
+    </td>
+    <td style="padding: 8px; border: 1px solid #ddd">
+      {{ lote.data_lancamento|date:"d/m/Y" }}
+    </td>
+  </tr>
+  {% endif %}
+</table>
+
+<h2>Jornada do Vinho</h2>
+<ul style="list-style-type: none; padding-left: 0">
+  {% if lote.data_colheita %}
+  <li style="margin-bottom: 1rem; padding-left: 2.5rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🍇</span
+    >
+    <strong>Colheita das Uvas:</strong> {{ lote.data_colheita|date:"d/m/Y" }} {%
+    if lote.origem_vinhedo %}<br /><small
+      ><em>Origem: {{ lote.origem_vinhedo }}</em></small
+    >{% endif %}
+  </li>
+  {% endif %} {% if lote.data_chegada_uvas %}
+  <li style="margin-bottom: 1rem; padding-left: 2.5rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🚚</span
+    >
+    <strong>Chegada das Uvas na Vinícola:</strong>
+    {{lote.data_chegada_uvas|date:"d/m/Y" }}
+  </li>
+  {% endif %} {% if lote.detalhes_fermentacao %}
+  <li style="margin-bottom: 1rem; padding-left: 2.5rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >⚗️</span
+    >
+    <strong>Detalhes da Fermentação:</strong><br />
+    {{lote.detalhes_fermentacao|linebreaksbr }}
+  </li>
+  {% endif %} {% if lote.tempo_barrica or lote.tipo_barrica %}
+  <li style="margin-bottom: 1rem; padding-left: 2.5rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🏺</span
+    >
+    <strong>Maturação em Barrica:</strong>
+    {% if lote.tempo_barrica %}<br />Tempo: {{ lote.tempo_barrica }} {% endif%}
+    {% if lote.tipo_barrica %}<br />Tipo: {{ lote.tipo_barrica }} {% endif%}
+  </li>
+  {% endif %} {% if lote.processo_envelhecimento %}
+  <li style="margin-bottom: 1rem; padding-left: 2.5rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >⏳</span
+    >
+    <strong>Outros Detalhes do Envelhecimento:</strong><br />{{
+    lote.processo_envelhecimento|linebreaksbr }}
+  </li>
+  {% endif %} {% if lote.data_engarrafamento %}
+  <li style="margin-bottom: 1rem; padding-left: 2.5rem; position: relative">
+    <span style="position: absolute; left: 0; top: 0; font-size: 1.5rem"
+      >🍾</span
+    >
+    <strong>Data de Engarrafamento:</strong> {{
+    lote.data_engarrafamento|date:"d/m/Y" }} {% if lote.tipo_rolha %}<br /><small
+      ><em>Rolha: {{ lote.tipo_rolha }}</em></small
+    >{% endif %}
+  </li>
+  {% endif %}
+</ul>
+
+{% if lote.notas_degustacao %}
+<div style="margin-top: 2rem">
+  <h2>Notas de Degustação</h2>
+  <p>{{ lote.notas_degustacao|linebreaksbr }}</p>
+</div>
+{% endif %} {% if lote.informacoes_adicionais %}
+<div style="margin-top: 2rem">
+  <h2>Informações Adicionais</h2>
+  <p>{{ lote.informacoes_adicionais|linebreaksbr }}</p>
+</div>
+{% endif %}
+<hr class="my-4" />
+<p class="text-muted small">Lote ID: {{ lote.id }}</p>
+<p class="text-muted small">Página acessada em: {% now "d/m/Y H:i" %}</p>
+
+{% endblock %}

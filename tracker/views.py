@@ -1,15 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin # Para proteger views
 from django.contrib.messages.views import SuccessMessageMixin
-from .models import LoteDeVinho,AvaliacaoCliente
-from .forms import LoteDeVinhoForm, AvaliacaoClienteForm
+from .models import LoteDeVinho,AvaliacaoCliente, ScanEvento
+from .forms import LoteDeVinhoForm, AvaliacaoClienteForm, SaidaEstoqueForm
+from django.contrib import messages
+from django.db.models import Sum, Count
+from django.utils import timezone
+from datetime import timedelta
 import qrcode
 from io import BytesIO
 import base64
-from django.http import Http404, JsonResponse # Importe JsonResponse
+from django.http import Http404 # Importe JsonResponse
 from django.db import models
+
 
 
 class PaginaInicialVinicolaView(LoginRequiredMixin, ListView):
@@ -17,10 +22,19 @@ class PaginaInicialVinicolaView(LoginRequiredMixin, ListView):
     template_name = 'tracker/vinicola_home.html'
     context_object_name = 'lotes_recentes'
     paginate_by = 10 # Mostrar 10 lotes por página
-    login_url = '/admin/login/' # Ou sua URL de login customizada
+    login_url = reverse_lazy('admin:login')# Ou sua URL de login customizada
 
     def get_queryset(self):
-        return LoteDeVinho.objects.order_by('-timestamp_criacao')[:20] # Exibe os 20 mais recentes
+            return LoteDeVinho.objects.order_by('-data_colheita', '-timestamp_criacao')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lotes_em_alerta'] = LoteDeVinho.objects.filter(
+            quantidade_em_estoque__lte=models.F('nivel_alerta_estoque')
+        ).exclude(nivel_alerta_estoque__isnull=True)
+        context['total_lotes'] = LoteDeVinho.objects.count()
+        context['total_garrafas_em_estoque'] = LoteDeVinho.objects.aggregate(total=Sum('quantidade_em_estoque'))['total'] or 0
+        return context
 
 class CadastrarLoteView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = LoteDeVinho
@@ -30,11 +44,11 @@ class CadastrarLoteView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = '/admin/login/'
 
     def get_success_url(self):
-        return reverse('tracker:mostrar_qr_code', kwargs={'batch_id': self.object.id})
+        return reverse('tracker:mostrar_qr_code', kwargs={'batch_id': self.object.pk})
 
 def mostrar_qr_code_view(request, batch_id):
     # Idealmente, esta view também seria protegida por login
-    lote = get_object_or_404(LoteDeVinho, id=batch_id)
+    lote = get_object_or_404(LoteDeVinho, pk=batch_id)
     qr_code_url = request.build_absolute_uri(lote.get_absolute_url())
 
     img = qrcode.make(qr_code_url)
@@ -84,3 +98,144 @@ def detalhes_lote_cliente(request, lote_id):
         'media_estrelas': media_estrelas,
     }
     return render(request, 'tracker/cliente_detalhe_lote.html', context)
+
+class EditarLoteView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = LoteDeVinho
+    form_class = LoteDeVinhoForm
+    template_name = 'tracker/admin_gerenciar_lote.html' # Reutiliza o template
+    success_message = "Lote '%(nome_lote)s' atualizado com sucesso!"
+    login_url = reverse_lazy('admin:login')
+    pk_url_kwarg = 'pk' # Define o nome do parâmetro da URL para a chave primária
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo_pagina'] = f"Editar Lote: {self.object.nome_lote}"
+        context['nome_botao'] = "Salvar Alterações"
+        return context
+
+    def get_success_url(self):
+        # Volta para a home da vinícola ou para os detalhes do lote editado
+        return reverse('tracker:home_vinicola')
+
+
+class ExcluirLoteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
+    model = LoteDeVinho
+    template_name = 'tracker/admin_confirmar_exclusao_lote.html'
+    success_url = reverse_lazy('tracker:home_vinicola')
+    success_message = "Lote excluído com sucesso."
+    login_url = reverse_lazy('admin:login')
+    pk_url_kwarg = 'pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo_pagina'] = f"Confirmar Exclusão do Lote: {self.object.nome_lote}"
+        return context
+
+    # Para o SuccessMessageMixin funcionar com DeleteView
+    def post(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().post(request, *args, **kwargs)
+
+
+class RegistrarSaidaEstoqueView(LoginRequiredMixin, DetailView):
+    model = LoteDeVinho
+    template_name = 'tracker/admin_registrar_saida_estoque.html'
+    pk_url_kwarg = 'pk'
+    context_object_name = 'lote'
+    login_url = reverse_lazy('admin:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = SaidaEstoqueForm()
+        context['titulo_pagina'] = f"Registrar Saída de Estoque: {self.object.nome_lote}"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        lote = self.get_object()
+        form = SaidaEstoqueForm(request.POST)
+        if form.is_valid():
+            quantidade_saida = form.cleaned_data['quantidade']
+            # observacao = form.cleaned_data['observacao'] # Pode ser salva em um log de movimentação
+
+            if quantidade_saida > lote.quantidade_em_estoque:
+                messages.error(request, f"Quantidade de saída ({quantidade_saida}) excede o estoque disponível ({lote.quantidade_em_estoque}).")
+            else:
+                lote.quantidade_em_estoque -= quantidade_saida
+                lote.save()
+                messages.success(request, f"{quantidade_saida} unidade(s) do lote '{lote.nome_lote}' removida(s) do estoque.")
+                # Aqui você poderia registrar a observação em um log de movimentação de estoque, se tivesse um.
+                return redirect('tracker:home_vinicola')
+
+        # Se o formulário for inválido ou houver erro de estoque, renderiza a página novamente
+        context = self.get_context_data(object=lote)
+        context['form'] = form # Passa o formulário com erros de volta para o template
+        return self.render_to_response(context)
+
+
+class VinicolaDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'tracker/vinicola_dashboard.html'
+    login_url = reverse_lazy('admin:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo_pagina'] = "Dashboard da Vinícola"
+
+        # Dados básicos para o dashboard
+        context['total_lotes'] = LoteDeVinho.objects.count()
+        context['total_garrafas_estoque'] = LoteDeVinho.objects.aggregate(total=Sum('quantidade_em_estoque'))['total'] or 0
+        context['lotes_em_alerta'] = LoteDeVinho.objects.filter(
+            quantidade_em_estoque__lte=models.F('nivel_alerta_estoque')
+        ).exclude(nivel_alerta_estoque__isnull=True).count()
+
+        # Scans recentes (últimos 30 dias)
+        trinta_dias_atras = timezone.now() - timedelta(days=30)
+        scans_recentes = ScanEvento.objects.filter(timestamp_scan__gte=trinta_dias_atras)
+        context['total_scans_30_dias'] = scans_recentes.count()
+
+        # Lotes mais escaneados (Top 5)
+        lotes_mais_escaneados = LoteDeVinho.objects.annotate(
+            num_scans=Count('scans')
+        ).filter(num_scans__gt=0).order_by('-num_scans')[:5]
+        context['lotes_mais_escaneados'] = lotes_mais_escaneados
+
+        # Dados para gráficos (exemplo - contagem de scans por dia nos últimos 7 dias)
+        # Isso seria melhor processado e passado para uma biblioteca de gráficos como Chart.js
+        scan_data_chart = []
+        labels_chart = []
+        today = timezone.now().date()
+        for i in range(6, -1, -1): # Últimos 7 dias
+            dia = today - timedelta(days=i)
+            labels_chart.append(dia.strftime("%d/%m"))
+            scan_data_chart.append(ScanEvento.objects.filter(timestamp_scan__date=dia).count())
+
+        context['scan_labels_chart'] = labels_chart
+        context['scan_data_chart'] = scan_data_chart
+
+        return context
+
+# --- Views Públicas (Cliente) ---
+
+
+class DetalheLoteClienteView(DetailView):
+    model = LoteDeVinho
+    template_name = 'tracker/cliente_detalhe_lote.html'
+    context_object_name = 'lote'
+    pk_url_kwarg = 'batch_id'
+
+    def get_object(self, queryset=None):
+        lote = super().get_object(queryset)
+        # Registrar o evento de scan
+        ScanEvento.objects.create(
+            lote_vinho=lote,
+            ip_address=self.get_client_ip(self.request),
+            user_agent=self.request.META.get('HTTP_USER_AGENT', '')
+        )
+        return lote
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
