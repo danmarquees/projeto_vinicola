@@ -131,7 +131,7 @@ pytz==2024.2
 pyudev==0.24.3
 pyxdg==0.27
 PyYAML==6.0.2
-pyynl @ file:///builddir/build/BUILD/kernel-6.14.9-build/kernel-6.14.9/linux-6.14.9-300.fc42.x86_64/tools/net/ynl
+#pyynl @ file:///builddir/build/BUILD/kernel-6.14.9-build/kernel-6.14.9/linux-6.14.9-300.fc42.x86_64/tools/net/ynl
 qrcode==8.2
 RapidFuzz==3.11.0
 referencing==0.36.2
@@ -143,8 +143,8 @@ requests-ftp==0.3.1
 requests-toolbelt==1.0.0
 rpds-py==0.25.0
 rpm==4.20.1
-selinux @ file:///builddir/build/BUILD/libselinux-3.8-build/libselinux-3.8/src
-sepolicy @ file:///builddir/build/BUILD/policycoreutils-3.8-build/selinux-3.8/python/sepolicy
+#selinux @ file:///builddir/build/BUILD/libselinux-3.8-build/libselinux-3.8/src
+#sepolicy @ file:///builddir/build/BUILD/policycoreutils-3.8-build/selinux-3.8/python/sepolicy
 setools==4.5.1
 setuptools==76.0.0
 shortuuid==1.0.13
