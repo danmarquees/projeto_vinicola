@@ -57,6 +57,7 @@
 
 <!-- Incluir Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const scanLabels = {{ scan_labels_chart|safe }};
@@ -86,7 +87,17 @@
                         }
                     },
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: Math.round,
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
                 }
             });
         }
