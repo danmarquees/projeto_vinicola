@@ -40,12 +40,40 @@ class LoteDeVinhoAdmin(admin.ModelAdmin):
     # }
 
 
+# NOVO REGISTRO: AvaliacaoClienteAdmin
 @admin.register(AvaliacaoCliente)
 class AvaliacaoClienteAdmin(admin.ModelAdmin):
-    list_display = ('nome_lote', 'estrelas', 'comentario', 'data_avaliacao')
-    list_filter = ('estrelas', 'data_avaliacao', 'nome_lote') # Filtrar por nome do vinho do lote
-    search_fields = ('nome_lote__nome_lote', 'comentario')
-    readonly_fields = ('data_avaliacao',) # A data de avaliação é gerada automaticamente
+    list_display = ('lote_vinho', 'nome_avaliador', 'get_nota', 'data_avaliacao')
+    list_filter = ('data_avaliacao', 'lote_vinho__nome_lote')
+    search_fields = ('lote_vinho__nome_lote', 'nome_avaliador', 'comentario')
+    # list_editable = ('aprovado',) # Permite editar o campo 'aprovado' diretamente na lista  <- 'aprovado' is not a field.
+    actions = ['aprovar_avaliacoes', 'reprovar_avaliacoes']
+
+    readonly_fields = ('data_avaliacao',) # Data não deve ser editável
+
+    fieldsets = (
+        (None, {
+            'fields': ('lote_vinho', 'nome_avaliador', 'email_avaliador')
+        }),
+        ('Conteúdo da Avaliação', {
+            'fields': ('nota', 'comentario')
+        }),
+        ('Moderação', {
+            'fields': ('aprovado', 'data_avaliacao')
+        }),
+    )
+
+    def get_nota(self, obj):
+        return obj.nota
+    get_nota.short_description = "Nota"
+
+    def aprovar_avaliacoes(self, request, queryset):
+        queryset.update(aprovado=True)
+    aprovar_avaliacoes.short_description = "Aprovar avaliações selecionadas"
+
+    def reprovar_avaliacoes(self, request, queryset):
+        queryset.update(aprovado=False)
+    reprovar_avaliacoes.short_description = "Reprovar avaliações selecionadas"
 
 @admin.register(ScanEvento)
 class ScanEventoAdmin(admin.ModelAdmin):

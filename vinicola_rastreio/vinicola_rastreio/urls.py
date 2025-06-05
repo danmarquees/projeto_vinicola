@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView # Para redirecionar a raiz
+from django.conf import settings # Importar settings
+from django.conf.urls.static import static # Importar static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,3 +26,7 @@ urlpatterns = [
     # Redireciona a URL raiz '/' para a home da vinícola (opcional)
     path('', RedirectView.as_view(url='/rastreio/vinicola/', permanent=True)),
 ]
+
+# Adicionar isso para servir arquivos de mídia durante o desenvolvimento
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

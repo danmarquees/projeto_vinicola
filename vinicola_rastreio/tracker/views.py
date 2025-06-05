@@ -3,10 +3,11 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin # Para proteger views
 from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic.edit import FormMixin # Importar FormMixin
 from .models import LoteDeVinho,AvaliacaoCliente, ScanEvento
 from .forms import LoteDeVinhoForm, AvaliacaoClienteForm, SaidaEstoqueForm
 from django.contrib import messages
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Avg
 from django.utils import timezone
 from datetime import timedelta
 import qrcode
@@ -216,20 +217,25 @@ class VinicolaDashboardView(LoginRequiredMixin, TemplateView):
 # --- Views Públicas (Cliente) ---
 
 
-class DetalheLoteClienteView(DetailView):
+class DetalheLoteClienteView(FormMixin, DetailView): # Adicionado FormMixin
     model = LoteDeVinho
     template_name = 'tracker/cliente_detalhe_lote.html'
     context_object_name = 'lote'
     pk_url_kwarg = 'batch_id'
+    form_class = AvaliacaoClienteForm # Define o formulário a ser usado
 
     def get_object(self, queryset=None):
         lote = super().get_object(queryset)
-        # Registrar o evento de scan
-        ScanEvento.objects.create(
-            lote_vinho=lote,
-            ip_address=self.get_client_ip(self.request),
-            user_agent=self.request.META.get('HTTP_USER_AGENT', '')
-        )
+        # Registrar o evento de scan se ainda não foi registrado para esta sessão/IP (opcional, para evitar múltiplos registros por refresh)
+        # Uma forma simples é usar a sessão:
+        session_key = f'scanned_lote_{lote.id}'
+        if not self.request.session.get(session_key, False):
+            ScanEvento.objects.create(
+                lote_vinho=lote,
+                ip_address=self.get_client_ip(self.request),
+                user_agent=self.request.META.get('HTTP_USER_AGENT', '')
+            )
+            self.request.session[session_key] = True # Marca como escaneado nesta sessão
         return lote
 
     def get_client_ip(self, request):
@@ -239,3 +245,38 @@ class DetalheLoteClienteView(DetailView):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lote = self.object
+        # Pega apenas avaliações aprovadas
+        context['avaliacoes'] = lote.avaliacoes.all()
+        context['form_avaliacao'] = self.get_form() # Adiciona o formulário de avaliação ao contexto
+
+        # Para os links de compartilhamento
+        context['share_url'] = self.request.build_absolute_uri(lote.get_absolute_url())
+        context['share_title'] = f"Descobri este vinho incrível: {lote.nome_lote}!"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object() # Garante que o objeto do DetailView esteja disponível
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        avaliacao = form.save(commit=False)
+        avaliacao.lote_vinho = self.object
+        # Se você decidir associar avaliações a usuários logados:
+        # if self.request.user.is_authenticated:
+        #     avaliacao.usuario = self.request.user
+        avaliacao.save()
+        messages.success(self.request, "Obrigado pela sua avaliação! Ela será revisada em breve.")
+        return redirect(self.object.get_absolute_url() + '#avaliacoes') # Redireciona para a seção de avaliações
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Houve um erro no seu formulário de avaliação. Por favor, verifique os campos.")
+        # Re-renderiza a página com o formulário e erros
+        return super().get(self.request) # Chama o método get para reconstruir o contexto
