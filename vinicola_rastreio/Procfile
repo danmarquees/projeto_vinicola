@@ -1,1 +1,1 @@
-web: gunicorn projeto_vinicola.wsgi
+web: gunicorn vinicola_rastreio.wsgi
