@@ -7,6 +7,8 @@ astroid==3.3.8
 attrs==25.1.0
 backoff==2.2.1
 beautifulsoup4==4.13.4
+#blivet==3.12.1
+#blivet-gui==2.6.0
 brazilcep==6.7.0
 Brlapi==0.8.6
 browser-use==0.1.40
