@@ -28,13 +28,9 @@ load_dotenv()
 SECRET_KEY = 'django-insecure-#d0vvlrf@8yn^qjmys0d5ni3+gu^2cmzh(_l=8_ir%=y)&dnc='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 
-
-ALLOWED_HOSTS = []
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -144,3 +140,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Para uso com WhiteNoise
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Adicionando pacotes necessários
+REQUIRED_PACKAGES = [
+    'dj-database-url',
+    'psycopg[binary]',
+]
+
+for package in REQUIRED_PACKAGES:
+    os.system(f"pip install {package}")
