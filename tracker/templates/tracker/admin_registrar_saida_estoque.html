@@ -1,0 +1,23 @@
+<!-- tracker/templates/tracker/admin_registrar_saida_estoque.html -->
+{% extends "tracker/base.html" %} {% block title %}{{ titulo_pagina }}
+{%endblock %} {% block content %}
+<h1>{{ titulo_pagina }}</h1>
+<p><strong>Lote:</strong> {{ lote.nome_lote }}</p>
+<p><strong>Estoque Atual:</strong> {{ lote.quantidade_em_estoque }} garrafas</p>
+
+<form method="post">
+  {% csrf_token %} {% for field in form %}
+  <div class="form-group">
+    {{ field.label_tag }} {{ field }} {% if field.help_text %}
+    <small class="form-text text-muted">{{ field.help_text }}</small>
+    {% endif %} {% for error in field.errors %}
+    <div class="invalid-feedback d-block">{{ error }}</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Registrar Saída</button>
+  <a href="{% url 'tracker:home_vinicola' %}" class="btn btn-secondary"
+    >Cancelar</a
+  >
+</form>
+{% endblock %}

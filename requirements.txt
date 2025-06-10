@@ -1,0 +1,12 @@
+# Framework Principal
+Django>=4.2,<4.3
+
+# Servidor de Produção e Configuração
+gunicorn>=21.0,<22.0
+dj-database-url>=2.1,<2.2
+whitenoise[brotli]>=6.6,<6.7
+python-dotenv>=1.0,<1.1
+
+# Funcionalidades da Aplicação
+qrcode[pil]>=7.4,<7.5
+Pillow>=10.0,<10.2

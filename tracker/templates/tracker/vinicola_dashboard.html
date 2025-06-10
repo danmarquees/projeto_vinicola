@@ -1,0 +1,106 @@
+{% extends "tracker/base.html" %} {% block title %}{{ titulo_pagina }}
+{%endblock %} {% block content %}
+<h1>{{ titulo_pagina }}</h1>
+
+<div class="row my-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Total de Lotes</div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_lotes }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total de Garrafas em Estoque</div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_garrafas_estoque }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div
+            class="card text-white {% if lotes_em_alerta > 0 %}bg-danger{% else %}bg-info{% endif %} mb-3"
+        >
+            <div class="card-header">Lotes em Alerta de Estoque</div>
+            <div class="card-body">
+                <h4 class="card-title">{{ lotes_em_alerta }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Atividade de Scan (Últimos 30 dias)</h2>
+<p>Total de scans: {{ total_scans_30_dias }}</p>
+
+{% if scan_labels_chart and scan_data_chart %}
+<div class="my-4">
+    <h3>Scans por Dia (Últimos 7 dias)</h3>
+    <canvas id="scansChart"></canvas>
+</div>
+{% endif %} {% if lotes_mais_escaneados %}
+<h2 class="mt-5">Lotes Mais Escaneados (Top 5)</h2>
+<ul class="list-group">
+    {% for lote in lotes_mais_escaneados %}
+    <li
+        class="list-group-item d-flex justify-content-between align-items-center"
+    >
+        <a href="{{ lote.get_absolute_url }}">{{ lote.nome_lote }}</a>
+        <span class="badge bg-primary rounded-pill"
+            >{{ lote.num_scans }} scans</span
+        >
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const scanLabels = {{ scan_labels_chart|safe }};
+        const scanData = {{ scan_data_chart|safe }};
+
+        if (scanLabels.length > 0 && scanData.length > 0) {
+            const ctx = document.getElementById('scansChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar', // ou 'line'
+                data: {
+                    labels: scanLabels,
+                    datasets: [{
+                        label: 'Número de Scans',
+                        data: scanData,
+                        backgroundColor: 'rgba(90, 45, 130, 0.5)', // Cor roxa com transparência
+                        borderColor: 'rgba(90, 45, 130, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1 // Garante que o eixo Y mostre apenas inteiros
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: Math.round,
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

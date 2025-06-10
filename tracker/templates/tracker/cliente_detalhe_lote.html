@@ -1,0 +1,239 @@
+{% extends "tracker/base.html" %}
+{% load static %} <!-- Adicionado para o caso de usar imagens estáticas de estrelas -->
+
+{% block title %}Detalhes do Vinho: {{ lote.nome_lote }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .rating-stars span {
+        font-size: 1.5em;
+        color: #ccc; /* Cor da estrela vazia */
+        cursor: default;
+    }
+    .rating-stars span.filled {
+        color: #ffc107; /* Cor da estrela preenchida (amarelo Bootstrap) */
+    }
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* Proporção 16:9 */
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+        background: #000;
+        margin-bottom: 1.5rem;
+        border-radius: 0.5rem;
+    }
+    .video-container iframe,
+    .video-container object,
+    .video_container embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .social-share-buttons a {
+        margin-right: 10px;
+        text-decoration: none;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 0.9em;
+    }
+    .social-share-buttons .share-facebook { background-color: #3b5998; }
+    .social-share-buttons .share-twitter { background-color: #00acee; }
+    .social-share-buttons .share-whatsapp { background-color: #25D366; }
+    .social-share-buttons .share-linkedin { background-color: #0e76a8; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+            {% if lote.imagem_vinho %}
+                <div class="text-center mb-4">
+                    <img src="{{ lote.imagem_vinho.url }}" alt="[Imagem de {{ lote.nome_lote }}]" class="img-fluid rounded shadow" style="max-height: 400px;">
+                </div>
+            {% endif %}
+
+            <div class="text-center mb-3">
+                <h1 class="display-5">{{ lote.nome_lote }}</h1>
+                <p class="lead"><em>{{ lote.variedade_uva }}</em></p>
+                {% if lote.avaliacao_media %}
+                    <div class="rating-stars mb-2" title="Avaliação Média: {{ lote.avaliacao_media }} de 5">
+                        {% for i in "12345"|make_list %}
+                            <span class="{% if lote.avaliacao_media >= i|add:"0" %}filled{% elif lote.avaliacao_media >= i|add:"-0.5" %}filled{% endif %}">★</span>
+                        {% endfor %}
+                        <small class="ms-2">({{ lote.avaliacao_media|floatformat:1 }} de 5 estrelas, {{ lote.total_avaliacoes }} avaliaç{% if lote.total_avaliacoes == 1 %}ão{% else %}ões{% endif %})</small>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Conteúdo Multimídia (Vídeo) -->
+            {% if lote.video_url %}
+            <div class="mb-4">
+                <h3 class="h4">Conheça Mais</h3>
+                <div class="video-container">
+                    <iframe width="560" height="315" src="{{ lote.video_url }}" title="Vídeo sobre {{ lote.nome_lote }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Seções de Informações -->
+            <div class="accordion" id="infoAccordion">
+                <!-- Jornada do Vinho -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingJornada">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJornada" aria-expanded="true" aria-controls="collapseJornada">
+                            🍇 Jornada do Vinho
+                        </button>
+                    </h2>
+                    <div id="collapseJornada" class="accordion-collapse collapse show" aria-labelledby="headingJornada" data-bs-parent="#infoAccordion">
+                        <div class="accordion-body">
+                            <ul class="list-unstyled">
+                                {% if lote.data_colheita %}
+                                  <li class="mb-2"><strong class="me-2">Colheita:</strong> {{ lote.data_colheita|date:"d/m/Y" }}{% if lote.origem_vinhedo %} (Origem: {{ lote.origem_vinhedo }}){% endif %}</li>
+                                {% endif %}
+                                {% if lote.data_chegada_uvas %}
+                                  <li class="mb-2"><strong class="me-2">Chegada na Vinícola:</strong> {{ lote.data_chegada_uvas|date:"d/m/Y" }}</li>
+                                {% endif %}
+                                {% if lote.detalhes_fermentacao %}
+                                  <li class="mb-2"><strong class="me-2">Fermentação:</strong> {{ lote.detalhes_fermentacao|linebreaksbr }}</li>
+                                {% endif %}
+                                {% if lote.tempo_barrica or lote.tipo_barrica %}
+                                  <li class="mb-2"><strong class="me-2">Maturação em Barrica:</strong>{% if lote.tempo_barrica %} Tempo: {{ lote.tempo_barrica }}.{% endif %}{% if lote.tipo_barrica %} Tipo: {{ lote.tipo_barrica }}.{% endif %}</li>
+                                {% endif %}
+                                {% if lote.processo_envelhecimento %}
+                                  <li class="mb-2"><strong class="me-2">Outros Detalhes do Envelhecimento:</strong> {{ lote.processo_envelhecimento|linebreaksbr }}</li>
+                                {% endif %}
+                                {% if lote.data_engarrafamento %}
+                                  <li class="mb-2"><strong class="me-2">Engarrafamento:</strong> {{ lote.data_engarrafamento|date:"d/m/Y" }}{% if lote.tipo_rolha %} (Rolha: {{ lote.tipo_rolha }}){% endif %}</li>
+                                {% endif %}
+                                {% if lote.data_lancamento %}
+                                  <li class="mb-2"><strong class="me-2">Disponível desde:</strong> {{ lote.data_lancamento|date:"d/m/Y" }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas de Degustação -->
+                {% if lote.notas_degustacao %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingDegustacao">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDegustacao" aria-expanded="false" aria-controls="collapseDegustacao">
+                            🍷 Notas de Degustação
+                        </button>
+                    </h2>
+                    <div id="collapseDegustacao" class="accordion-collapse collapse" aria-labelledby="headingDegustacao" data-bs-parent="#infoAccordion">
+                        <div class="accordion-body">
+                            {{ lote.notas_degustacao|linebreaksbr }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Harmonização e Consumo -->
+                {% if lote.sugestoes_harmonizacao or lote.temperatura_servico or lote.dicas_armazenamento %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingConsumo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConsumo" aria-expanded="false" aria-controls="collapseConsumo">
+                            🍽️ Dicas de Consumo e Harmonização
+                        </button>
+                    </h2>
+                    <div id="collapseConsumo" class="accordion-collapse collapse" aria-labelledby="headingConsumo" data-bs-parent="#infoAccordion">
+                        <div class="accordion-body">
+                            {% if lote.sugestoes_harmonizacao %}
+                                <p><strong>Sugestões de Harmonização:</strong><br>{{ lote.sugestoes_harmonizacao|linebreaksbr }}</p>
+                            {% endif %}
+                            {% if lote.temperatura_servico %}
+                                <p><strong>Temperatura Ideal de Serviço:</strong> {{ lote.temperatura_servico }}</p>
+                            {% endif %}
+                            {% if lote.dicas_armazenamento %}
+                                <p><strong>Dicas de Armazenamento:</strong><br>{{ lote.dicas_armazenamento|linebreaksbr }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Informações Adicionais -->
+                {% if lote.informacoes_adicionais %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingAdicionais">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdicionais" aria-expanded="false" aria-controls="collapseAdicionais">
+                            ℹ️ Informações Adicionais
+                        </button>
+                    </h2>
+                    <div id="collapseAdicionais" class="accordion-collapse collapse" aria-labelledby="headingAdicionais" data-bs-parent="#infoAccordion">
+                        <div class="accordion-body">
+                            {{ lote.informacoes_adicionais|linebreaksbr }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div> <!-- Fim do Accordion -->
+
+
+            <!-- Seção de Avaliações e Feedback -->
+            <div class="mt-5" id="avaliacoes">
+                <h3 class="h4 mb-3">Avaliações e Comentários de Clientes</h3>
+                {% if avaliacoes %}
+                    {% for avaliacao in avaliacoes %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <div class="rating-stars d-inline-block me-2" title="Nota: {{ avaliacao.nota }} de 5">
+                                        {% for i in "12345"|make_list %}
+                                            <span class="{% if avaliacao.nota >= i|add:"0" %}filled{% endif %}">★</span>
+                                        {% endfor %}
+                                    </div>
+                                    {{ avaliacao.nome_avaliador|default:"Avaliador Anônimo" }}
+                                </h5>
+                                <p class="card-text">{{ avaliacao.comentario|linebreaksbr }}</p>
+                                <p class="card-text"><small class="text-muted">Avaliado em: {{ avaliacao.data_avaliacao|date:"d/m/Y H:i" }}</small></p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Este vinho ainda não possui avaliações. Seja o primeiro a avaliar!</p>
+                {% endif %}
+
+                <hr class="my-4">
+                <h4 class="h5 mb-3">Deixe sua Avaliação:</h4>
+                <form method="post" action="{{ request.path }}#avaliacoes"> {# Ação aponta para a própria página #}
+                    {% csrf_token %}
+                    {% for field in form_avaliacao %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
+                </form>
+            </div>
+
+            <!-- Botões de Compartilhamento Social -->
+            <div class="mt-5 text-center social-share-buttons">
+                <h4 class="h5 mb-3">Compartilhe este Vinho:</h4>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" class="share-facebook">Facebook</a>
+                <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ share_title|urlencode }}" target="_blank" class="share-twitter">Twitter</a>
+                <a href="https://wa.me/?text={{ share_title|urlencode }}%20{{ share_url|urlencode }}" target="_blank" class="share-whatsapp">WhatsApp</a>
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url|urlencode }}&title={{ share_title|urlencode }}&summary=Confira este vinho incrível!" target="_blank" class="share-linkedin">LinkedIn</a>
+            </div>
+
+            <hr class="my-5">
+            <p class="text-center text-muted small">ID do Lote: {{ lote.id }} | Página acessada em: {% now "d/m/Y H:i" %}</p>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
