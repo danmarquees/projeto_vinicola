@@ -46,11 +46,6 @@ class Migration(migrations.Migration):
             field=models.URLField(blank=True, help_text="Link para um vídeo (Ex: YouTube, Vimeo) sobre o vinho, vinícola ou produção. Use o link de 'incorporar' (embed).", null=True, verbose_name='URL do Vídeo'),
         ),
         migrations.AlterField(
-            model_name='avaliacaocliente',
-            name='id',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
-        ),
-        migrations.AlterField(
             model_name='lotedevinho',
             name='dicas_armazenamento',
             field=models.TextField(blank=True, help_text='Instruções sobre como armazenar a garrafa para preservar a qualidade do vinho.', null=True, verbose_name='Dicas de Armazenamento'),
