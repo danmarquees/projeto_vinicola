@@ -1,60 +1,128 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import LoginPage from "./components/LoginPage";
+import AdminPanel from "./components/AdminPanel";
+import ClientView from "./components/ClientView";
+
+// Componente para ícone de carregamento (Spinner)
+const Spinner = () => (
+  <svg
+    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    ></circle>
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    ></path>
+  </svg>
+);
 
 function App() {
-  // Estado para armazenar os lotes de vinho
+  // Estado para controlar a autenticação e a visão atual
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentView, setCurrentView] = useState("login"); // 'login', 'admin', 'client'
+  const [selectedLote, setSelectedLote] = useState(null);
   const [lotes, setLotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // useEffect para buscar os dados da API quando o componente for montado
+  // Efeito para buscar os lotes da API quando o componente for montado
   useEffect(() => {
-    const fetchLotes = async () => {
-      try {
-        // A chamada agora é para /api/lotes/, que será encaminhada pelo proxy do Vite
-        const response = await fetch("/api/lotes/");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setLotes(data);
-      } catch (error) {
-        setError(error);
-        console.error("Erro ao buscar lotes:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // A verificação de autenticação aconteceria aqui.
+    // Por enquanto, vamos assumir que não está autenticado e parar o carregamento.
+    setIsLoading(false);
+    // fetchLotes(); // Descomente quando a API estiver pronta
+  }, []);
 
-    fetchLotes();
-  }, []); // O array vazio garante que este efeito rode apenas uma vez após a montagem inicial
+  const fetchLotes = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/lotes/");
+      if (!response.ok) {
+        throw new Error("Falha ao buscar os dados.");
+      }
+      const data = await response.json();
+      setLotes(data);
+    } catch (err) {
+      setError(
+        "Não foi possível carregar os lotes. Tente novamente mais tarde.",
+      );
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Função de login (simulada)
+  const handleLogin = (username, password) => {
+    setIsLoading(true);
+    // Simula uma chamada de API
+    setTimeout(() => {
+      if (username === "vinicola" && password === "django") {
+        setIsAuthenticated(true);
+        setCurrentView("admin");
+        fetchLotes(); // Busca os lotes após o login
+      } else {
+        alert("Credenciais inválidas!");
+      }
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentView("login");
+    setLotes([]);
+  };
+
+  // Função para lidar com a adição de um novo lote
+  const handleAddLote = async (newLote) => {
+    // Lógica para enviar o novo lote para a API
+    const id = lotes.length > 0 ? Math.max(...lotes.map((l) => l.id)) + 1 : 1;
+    setLotes([...lotes, { ...newLote, id }]);
+  };
+
+  // Função para visualizar os detalhes de um lote (visão do cliente)
+  const handleViewLote = (lote) => {
+    setSelectedLote(lote);
+    setCurrentView("client");
+  };
+
+  // Função para fechar a visão do cliente e voltar para o painel admin
+  const handleCloseClientView = () => {
+    setCurrentView("admin");
+    setSelectedLote(null);
+  };
+
+  // Renderização condicional baseada no estado
+  if (currentView === "login") {
+    return <LoginPage onLogin={handleLogin} isLoading={isLoading} />;
+  }
+
+  if (currentView === "client" && selectedLote) {
+    return <ClientView lote={selectedLote} onClose={handleCloseClientView} />;
+  }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Sistema de Rastreabilidade de Vinhos</h1>
-      </header>
-      <main>
-        <h2>Lotes de Vinho</h2>
-        {loading && <p>Carregando lotes...</p>}
-        {error && <p>Erro ao carregar dados: {error.message}</p>}
-        {!loading && !error && lotes.length === 0 && (
-          <p>Nenhum lote encontrado.</p>
-        )}
-        {!loading && !error && lotes.length > 0 && (
-          <ul>
-            {lotes.map((lote) => (
-              <li key={lote.id}>
-                <strong>ID:</strong> {lote.id},<strong>Nome:</strong>{" "}
-                {lote.nome_vinho},<strong>Safra:</strong> {lote.safra},
-                <strong>Volume:</strong> {lote.volume_litros}L
-                {/* Adicione outros campos conforme sua API */}
-              </li>
-            ))}
-          </ul>
-        )}
-      </main>
-    </div>
+    <AdminPanel
+      lotes={lotes}
+      onAddLote={handleAddLote}
+      onViewLote={handleViewLote}
+      onLogout={handleLogout}
+      isLoading={isLoading}
+      error={error}
+    />
   );
 }
 
