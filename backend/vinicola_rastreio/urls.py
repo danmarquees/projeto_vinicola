@@ -22,9 +22,7 @@ from django.conf.urls.static import static # Importar static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('rastreio/', include('tracker.urls', namespace='tracker')),
-    # Redireciona a URL raiz '/' para a home da vinícola (opcional)
-    path('', RedirectView.as_view(url='/rastreio/vinicola/', permanent=True)),
+    path('api/', include('tracker.urls', namespace='tracker')),
 ]
 
 # Adicionar isso para servir arquivos de mídia durante o desenvolvimento

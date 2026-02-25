@@ -28,20 +28,28 @@ const Spinner = () => (
 );
 
 function App() {
-  // Estado para controlar a autenticação e a visão atual
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState("login"); // 'login', 'admin', 'client'
+  const [currentView, setCurrentView] = useState("login");
   const [selectedLote, setSelectedLote] = useState(null);
   const [lotes, setLotes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Efeito para buscar os lotes da API quando o componente for montado
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("vinicola_token");
+    return token ? { Authorization: `Token ${token}` } : {};
+  };
+
   useEffect(() => {
-    // A verificação de autenticação aconteceria aqui.
-    // Por enquanto, vamos assumir que não está autenticado e parar o carregamento.
-    setIsLoading(false);
-    // fetchLotes(); // Descomente quando a API estiver pronta
+    const token = localStorage.getItem("vinicola_token");
+    if (token) {
+      setIsAuthenticated(true);
+      setCurrentView("admin");
+      fetchLotes();
+    } else {
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line
   }, []);
 
   const fetchLotes = async () => {
@@ -49,63 +57,116 @@ function App() {
     setError("");
     try {
       const response = await fetch("/api/lotes/");
-      if (!response.ok) {
-        throw new Error("Falha ao buscar os dados.");
-      }
+      if (!response.ok) throw new Error("Falha ao buscar os lotes.");
       const data = await response.json();
       setLotes(data);
     } catch (err) {
-      setError(
-        "Não foi possível carregar os lotes. Tente novamente mais tarde.",
-      );
+      setError("Não foi possível carregar os lotes.");
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Função de login (simulada)
-  const handleLogin = (username, password) => {
+  const handleLogin = async (username, password) => {
     setIsLoading(true);
-    // Simula uma chamada de API
-    setTimeout(() => {
-      if (username === "vinicola" && password === "django") {
-        setIsAuthenticated(true);
-        setCurrentView("admin");
-        fetchLotes(); // Busca os lotes após o login
-      } else {
-        alert("Credenciais inválidas!");
-      }
+    setError("");
+    try {
+      const response = await fetch("/api/auth/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!response.ok) throw new Error("Credenciais inválidas!");
+
+      const data = await response.json();
+      localStorage.setItem("vinicola_token", data.token);
+      setIsAuthenticated(true);
+      setCurrentView("admin");
+      fetchLotes();
+    } catch (err) {
+      alert(err.message || "Erro no login.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("vinicola_token");
     setIsAuthenticated(false);
     setCurrentView("login");
     setLotes([]);
   };
 
-  // Função para lidar com a adição de um novo lote
   const handleAddLote = async (newLote) => {
-    // Lógica para enviar o novo lote para a API
-    const id = lotes.length > 0 ? Math.max(...lotes.map((l) => l.id)) + 1 : 1;
-    setLotes([...lotes, { ...newLote, id }]);
+    try {
+      const response = await fetch("/api/lotes/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({
+          ...newLote,
+          quantidade_produzida_inicial: 100,
+          quantidade_em_estoque: 100
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao adicionar lote");
+      const createdLote = await response.json();
+      setLotes([createdLote, ...lotes]);
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
-  // Função para visualizar os detalhes de um lote (visão do cliente)
+  const handleUpdateLote = async (id, updatedData) => {
+    try {
+      const response = await fetch(`/api/lotes/${id}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({
+          ...updatedData,
+          quantidade_produzida_inicial: 100,
+          quantidade_em_estoque: 100
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao atualizar lote");
+      const savedLote = await response.json();
+      setLotes(lotes.map(l => (l.id === id ? savedLote : l)));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteLote = async (id) => {
+    if (!window.confirm("Certeza que deseja excluir este lote?")) return;
+    try {
+      const response = await fetch(`/api/lotes/${id}/`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) throw new Error("Falha ao excluir lote");
+      setLotes(lotes.filter(l => l.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleViewLote = (lote) => {
     setSelectedLote(lote);
     setCurrentView("client");
   };
 
-  // Função para fechar a visão do cliente e voltar para o painel admin
   const handleCloseClientView = () => {
-    setCurrentView("admin");
+    setCurrentView(isAuthenticated ? "admin" : "login");
     setSelectedLote(null);
   };
 
-  // Renderização condicional baseada no estado
   if (currentView === "login") {
     return <LoginPage onLogin={handleLogin} isLoading={isLoading} />;
   }
@@ -118,6 +179,8 @@ function App() {
     <AdminPanel
       lotes={lotes}
       onAddLote={handleAddLote}
+      onUpdateLote={handleUpdateLote}
+      onDeleteLote={handleDeleteLote}
       onViewLote={handleViewLote}
       onLogout={handleLogout}
       isLoading={isLoading}

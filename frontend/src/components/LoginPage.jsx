@@ -47,49 +47,56 @@ const LoginPage = ({ onLogin, isLoading }) => {
 
   return (
     <div
-      className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4"
-      style={{
-        background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
-      }}
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gray-950 font-sans"
     >
-      <div className="w-full max-w-md">
-        <div className="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl shadow-2xl p-8 space-y-8 border border-gray-700">
-          <div className="text-center">
-            <div className="flex justify-center">
-              <WineIcon />
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-rose-950/40 via-gray-950 to-black z-0"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-red-900/30 rounded-full blur-[120px] mix-blend-screen pointer-events-none z-0 animate-pulse"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-amber-900/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none z-0"></div>
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-black/40 backdrop-blur-xl rounded-3xl shadow-2xl p-10 space-y-8 border border-white/5 relative overflow-hidden">
+          {/* Subtle shine effect */}
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+
+          <div className="text-center relative z-20">
+            <div className="flex justify-center mb-2 drop-shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+              <WineIcon className="h-16 w-16 text-rose-200 mb-6" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-wider">
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-100 to-amber-100 tracking-tight pt-2" style={{ fontFamily: '"Playfair Display", serif' }}>
               RASTREABILIDADE
             </h1>
-            <p className="text-gray-400">Acesso ao Painel da Vinícola</p>
+            <p className="text-amber-200/50 mt-2 font-light text-sm tracking-widest uppercase">Adega Premium</p>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+          <form onSubmit={handleSubmit} className="space-y-6 relative z-20">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-rose-200/50 uppercase tracking-widest pl-1">ID do Mestre</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Usuário (vinicola)"
+                placeholder="Ex: vinicola"
                 required
-                className="w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                className="w-full px-5 py-3.5 bg-black/50 text-rose-50 placeholder-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-900/50 border border-white/5 transition-all duration-300 shadow-inner"
               />
             </div>
-            <div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-rose-200/50 uppercase tracking-widest pl-1">Chave de Acesso</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha (django)"
+                placeholder="Ex: django"
                 required
-                className="w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                className="w-full px-5 py-3.5 bg-black/50 text-rose-50 placeholder-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-900/50 border border-white/5 transition-all duration-300 shadow-inner"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center font-bold text-white bg-purple-600 hover:bg-purple-700 py-3 rounded-lg transition-transform transform hover:scale-105 disabled:bg-purple-800 disabled:cursor-not-allowed"
+              className="w-full mt-8 flex justify-center items-center font-bold text-rose-50 bg-gradient-to-r from-rose-900 to-red-950 hover:from-rose-800 hover:to-red-900 py-3.5 rounded-xl border border-rose-800/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(225,29,72,0.2)] disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              {isLoading ? <Spinner /> : "Entrar"}
+              {isLoading ? <Spinner /> : <span className="tracking-widest uppercase text-sm">Desrolhar Acesso</span>}
             </button>
           </form>
         </div>
