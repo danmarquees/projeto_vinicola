@@ -144,10 +144,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Diretórios adicionais onde o Django procurará por arquivos estáticos
-# Incluímos o diretório de build do Vite (dist)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '..', 'frontend', 'dist')
-]
+# Na Vercel, o diretório frontend pode não estar no memo container do backend (Serverless).
+# O os.path.isdir assegura que o Django não dê "crash 500" na inicialização da Cloud se a pasta não existir.
+frontend_dist_path = os.path.join(BASE_DIR, '..', 'frontend', 'dist')
+STATICFILES_DIRS = []
+if os.path.isdir(frontend_dist_path):
+    STATICFILES_DIRS.append(frontend_dist_path)
 
 # Configuração para Whitenoise (para servir arquivos estáticos de forma eficiente)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
