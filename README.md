@@ -1,172 +1,115 @@
-# Guia de Configuração e Execução: Sistema de Rastreabilidade de Vinhos com Django
+# Sistema de Rastreabilidade de Vinhos Premium 🍷
 
------
+Este projeto é uma plataforma full-stack moderna de **Rastreabilidade e Gestão de Adega**, projetada para registrar o ciclo de vida de lotes de vinho premium — desde a colheita até a degustação final —, além de apresentar uma interface visual de alto padrão (Bordeaux & Champagne) para os clientes através da leitura de QR Codes nas garrafas.
 
-## 1\. Introdução
+---
 
-Este documento fornece as instruções passo a passo para configurar e executar o projeto **"Sistema de Rastreabilidade de Vinhos"** desenvolvido com o framework **Django**. O sistema permite que uma vinícola cadastre lotes de vinho e gere **QR Codes** que, ao serem escaneados pelos clientes, exibem informações detalhadas sobre a procedência e o processo de produção do vinho.
+## 🏗️ Arquitetura do Projeto
 
------
+O sistema foi refatorado de uma arquitetura legada (Django SSR) para uma **Arquitetura Full-Stack Desacoplada**:
 
-## 2\. Pré-requisitos
+* **Frontend:** React + Vite + Tailwind CSS v4. Responsável por todo o visual elegante (Admin Panel e a Jornada do Cliente no QR Code).
+* **Backend:** Django Rest Framework (DRF). Fornece uma API JSON segura, com Autenticação baseada em Tokens e banco de dados contendo o modelo enológico completo.
 
-Antes de começar, certifique-se de que você tem os seguintes softwares instalados em seu sistema:
+---
 
-  * **Python**: Versão 3.8 ou superior. Você pode baixá-lo em [python.org](https://www.python.org).
-  * **Pip**: O gerenciador de pacotes do Python. Geralmente, ele é instalado automaticamente com o Python.
-  * **Git** (Opcional, mas recomendado): Para clonar o repositório do projeto, se aplicável. Caso contrário, certifique-se de ter todos os arquivos do projeto.
+## 🚀 Como Rodar o Projeto Localmente
 
------
+O projeto exige que dois servidores rodem em paralelo (em janelas de terminais diferentes): o Servidor Banco de Dados/API (Django) e o Servidor Visual (React).
 
-## 3\. Configuração do Ambiente do Projeto
+### Passo 1: O Backend (Django)
 
-### 3.1. Obtenha os Arquivos do Projeto
+1. Abra um terminal e navegue até a pasta do backend:
 
-Se o projeto estiver em um repositório Git, clone-o:
+   ```bash
+   cd backend
+   ```
 
-```bash
-git clone <URL_DO_REPOSITORIO>
-cd nome-do-diretorio-do-projeto
-```
+2. Crie e ative um ambiente virtual (recomendado):
 
-Caso contrário, certifique-se de que todos os arquivos do projeto estejam em um diretório na sua máquina e navegue até ele pelo terminal.
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # Mac/Linux
+   # venv\Scripts\activate   # Windows
+   ```
 
-### 3.2. Crie e Ative um Ambiente Virtual
+3. Instale as bibliotecas Python (Django, DRF, CORS, etc.):
 
-Navegue até o diretório raiz do projeto (onde o arquivo `manage.py` está localizado):
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-cd caminho/para/seu/projeto_vinicola
-```
+4. Aplique o banco de dados e inicie o servidor:
 
-Crie um ambiente virtual (chamado `venv`):
+   ```bash
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-```bash
-python -m venv venv
-```
+*O Backend ficará escutando em `http://localhost:8000/`. Ele gerencia as rotas `/api/lotes/`, `/api/auth/login/` e `/api/scans/`.*
 
-Ative o ambiente virtual:
+### Passo 2: O Frontend (React/Vite)
 
-  * **No Windows:**
-    ```bash
-    venv\Scripts\activate
-    ```
-  * **No macOS/Linux:**
-    ```bash
-    source venv/bin/activate
-    ```
+1. Abra um **novo** terminal e navegue até a pasta do frontend:
 
-Após a ativação, o nome do ambiente virtual (ex: `(venv)`) aparecerá no início do seu prompt de comando.
+   ```bash
+   cd frontend
+   ```
 
-### 3.3. Instale as Dependências
+2. Instale as dependências JavaScript:
 
-Se o arquivo `requirements.txt` existir:
+   ```bash
+   npm install
+   ```
 
-```bash
-pip install -r requirements.txt
-```
+3. Inicie o servidor veloz do Vite:
 
-Se o arquivo `requirements.txt` não existir, instale manualmente:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-pip install Django qrcode[pil]
-```
+*O Frontend ficará disponível em `http://localhost:5173/`. Por padrão, o `vite.config.js` já está configurado como um Proxy que envia requisições do frontend para a porta 8000 do Django, evitando problemas de CORS.*
 
-(Opcional) Para gerar o `requirements.txt`:
+---
 
-```bash
-pip freeze > requirements.txt
-```
+## 🍷 Como Usar o Sistema
 
------
+### 1. Acesso do Administrador (Gestão de Adega)
 
-## 4\. Configuração do Banco de Dados
+Acesse a raiz do frontend (`http://localhost:5173/`). Você cairá na tela de login.
+O sistema requesitará um usuário certificado pelo banco do Django.
+* *Dica:* Se você acabou de instalar o projeto, pode criar um usuário de adega direto do terminal backend rodando `python manage.py createsuperuser`.
 
-O projeto utiliza SQLite por padrão, o que simplifica a configuração inicial.
+Ao logar, você verá o Dashboard da Vinícola, onde poderá:
+* Criar novos lotes de vinho com métricas complexas (Uva, Temperatura, Harmonizações, Quantidade em Estoque, Limite de Alerta).
+* Ver painéis dinâmicos de "Alerta de Baixo Estoque".
+* Gerar o **QR Code** único para imprimir no rótulo daquela garrafa.
 
-### 4.1. Aplique as Migrações Iniciais
+### 2. Acesso do Cliente Final (O Rótulo Digital)
 
-```bash
-python manage.py makemigrations tracker
-python manage.py migrate
-```
+Quando o cliente ler o QR Code com a câmera do celular, ele será levado ao Rótulo Digital animado e sem necessidade de login. Essa tela exibe:
+* **Origem:** Dados do terroir, ano de colheita e uva.
+* **Timeline de Envelhecimento:** Componente visual calculando a permanência em barril.
+* **Guia do Sommelier:** Dicas cadastradas de Temperatura de Serviço, Tempo de Guarda e Harmonização.
+* **Dinâmica Visual:** Se o vinho for tinto, o site ficará em tons de Rosé Escuro. Se for branco (ex: *Chardonnay*), a tela brilhará em tons de Ouro.
 
-Isso criará um arquivo `db.sqlite3` no diretório raiz do projeto.
+> **💡 Analytics Automático:** Cada vez que um rótulo digital é aberto por um cliente, o frontend dispara dados passivos para a rota `ScanEvento` do backend, gerando ricas métricas de leitura para o administrador.
 
-### 4.2. Crie um Superusuário
+---
 
-```bash
-python manage.py createsuperuser
-```
+## 🛠️ Tecnologias Utilizadas
 
-Siga as instruções no terminal para definir nome de usuário, e-mail e senha.
+**Frontend:**
+* React 18
+* Vite
+* Tailwind CSS v4 (Design System)
+* `qrcode.react`
 
------
+**Backend:**
+* Python 3.8+
+* Django 4.2+
+* Django REST Framework (DRF)
+* `django-cors-headers`
+* SQLite (Banco Relacional Padrão)
 
-## 5\. Executando o Servidor de Desenvolvimento
-
-Inicie o servidor de desenvolvimento:
-
-```bash
-python manage.py runserver
-```
-
-Por padrão, o servidor estará em `http://127.0.0.1:8000/`. Para outra porta:
-
-```bash
-python manage.py runserver 8080
-```
-
------
-
-## 6\. Acessando a Aplicação
-
-  * **Página Inicial da Aplicação**
-    `http://127.0.0.1:8000/`
-    Redireciona para a página inicial da área da vinícola.
-
-  * **Área da Vinícola (Requer Login)**
-    `http://127.0.0.1:8000/rastreio/vinicola/`
-    Redireciona para o login se não estiver autenticado.
-
-  * **Cadastro de Novo Lote de Vinho (Requer Login)**
-    `http://127.0.0.1:8000/rastreio/vinicola/cadastrar/`
-
-  * **Visualização do QR Code (Requer Login)**
-    `http://127.0.0.1:8000/rastreio/vinicola/qr-code/ID_DO_LOTE/`
-    Substitua `ID_DO_LOTE` pelo UUID do lote.
-
-  * **Detalhes do Lote para o Cliente**
-    `http://127.0.0.1:8000/rastreio/lote/ID_DO_LOTE/`
-    Página pública para o cliente.
-
-  * **Interface Administrativa do Django**
-    `http://127.0.0.1:8000/admin/`
-    Faça login com o superusuário criado.
-
------
-
-## 7\. Estrutura de Arquivos Relevantes (Resumo)
-
-  * `manage.py`: Utilitário do Django.
-  * `vinicola_rastreio/`: Diretório do projeto
-      * `settings.py`: Configurações do projeto
-      * `urls.py`: URLs principais
-  * `tracker/`: App Django da rastreabilidade
-      * `models.py`: Modelos de dados
-      * `views.py`: Lógica das requisições
-      * `forms.py`: Formulários Django
-      * `urls.py`: URLs do app
-      * `admin.py`: Configuração admin
-      * `templates/tracker/`: Arquivos HTML
-  * `db.sqlite3`: Banco de dados SQLite
-  * `requirements.txt`: Lista de dependências
-
------
-
-## 8\. Solução de Problemas Comuns
-
-  * **`ModuleNotFoundError`**: Verifique se o ambiente virtual está ativado e se instalou as dependências (`pip install -r requirements.txt`).
-  * **Erro de Migração (`no such table`)**: Certifique-se de ter rodado `makemigrations` e `migrate`.
-  * **Erro 404 (Página Não Encontrada)**: Verifique se as URLs estão configuradas corretamente.
-  * **Arquivos Estáticos não carregam**: Certifique-se de que `DEBUG=True` está no `settings.py`. Para produção, use ferramentas como Whitenoise.
+*Desenvolvido com sofisticação. Aprecie com moderação.*
