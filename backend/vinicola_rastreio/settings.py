@@ -30,7 +30,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-#d0vvlrf@8yn^q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True' # Use variável de ambiente para DEBUG
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+# Permite localhost para dev, e curinga Vercel para produção
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app']
 
 
 # Application definition
@@ -161,12 +162,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuração CORS para desenvolvimento
+# Configuração CORS para desenvolvimento e produção Vercel
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Porta padrão do Vite
     "http://127.0.0.1:5173",
 ]
-# Se você precisar permitir todas as origens durante o desenvolvimento (menos seguro):
-# CORS_ALLOW_ALL_ORIGINS = True
 
-# Removido bloco de código duplicado e inseguro
+# Em produção na Vercel, o frontend e backend rodam sob o mesmo domínio (Proxy via vercel.json).
+# Porém, para garantir tranquilidade se você desmembrar futuramente:
+CORS_ALLOW_ALL_ORIGINS = True  # Facilitador de deploy (Pode ser restrito futuramente)
