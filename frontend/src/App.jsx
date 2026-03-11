@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import LoginPage from "./components/LoginPage";
-import AdminPanel from "./components/AdminPanel";
-import PublicLoteView from "./components/PublicLoteView";
+
+const LoginPage = lazy(() => import("./components/LoginPage"));
+const AdminPanel = lazy(() => import("./components/AdminPanel"));
+const PublicLoteView = lazy(() => import("./components/PublicLoteView"));
 
 // Componente para ícone de carregamento (Spinner)
 const Spinner = () => (
@@ -162,36 +163,43 @@ function AppContent() {
   };
 
   return (
-    <Routes>
-      <Route 
-        path="/" 
-        element={
-          isAuthenticated ? (
-            <Navigate to="/admin" replace />
-          ) : (
-            <LoginPage onLogin={handleLogin} isLoading={isLoading} />
-          )
-        } 
-      />
-      <Route 
-        path="/admin" 
-        element={
-          <RequireAuth>
-            <AdminPanel
-              lotes={lotes}
-              onAddLote={handleAddLote}
-              onUpdateLote={handleUpdateLote}
-              onDeleteLote={handleDeleteLote}
-              onLogout={handleLogout}
-              isLoading={isLoading}
-              error={error}
-            />
-          </RequireAuth>
-        } 
-      />
-      <Route path="/vinho/:id" element={<PublicLoteView />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fdfcfb]">
+        <Spinner />
+        <p className="text-xl text-rose-900 font-medium tracking-wide mt-4">Carregando...</p>
+      </div>
+    }>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            isAuthenticated ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <LoginPage onLogin={handleLogin} isLoading={isLoading} />
+            )
+          } 
+        />
+        <Route 
+          path="/admin" 
+          element={
+            <RequireAuth>
+              <AdminPanel
+                lotes={lotes}
+                onAddLote={handleAddLote}
+                onUpdateLote={handleUpdateLote}
+                onDeleteLote={handleDeleteLote}
+                onLogout={handleLogout}
+                isLoading={isLoading}
+                error={error}
+              />
+            </RequireAuth>
+          } 
+        />
+        <Route path="/vinho/:id" element={<PublicLoteView />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
