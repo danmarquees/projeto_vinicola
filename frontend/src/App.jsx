@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import AdminPanel from "./components/AdminPanel";
-import ClientView from "./components/ClientView";
+import PublicLoteView from "./components/PublicLoteView";
 
 // Componente para ícone de carregamento (Spinner)
 const Spinner = () => (
@@ -27,13 +28,12 @@ const Spinner = () => (
   </svg>
 );
 
-function App() {
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState("login");
-  const [selectedLote, setSelectedLote] = useState(null);
   const [lotes, setLotes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("vinicola_token");
@@ -44,12 +44,10 @@ function App() {
     const token = localStorage.getItem("vinicola_token");
     if (token) {
       setIsAuthenticated(true);
-      setCurrentView("admin");
       fetchLotes();
     } else {
       setIsLoading(false);
     }
-    // eslint-disable-next-line
   }, []);
 
   const fetchLotes = async () => {
@@ -83,8 +81,8 @@ function App() {
       const data = await response.json();
       localStorage.setItem("vinicola_token", data.token);
       setIsAuthenticated(true);
-      setCurrentView("admin");
       fetchLotes();
+      navigate("/admin");
     } catch (err) {
       alert(err.message || "Erro no login.");
     } finally {
@@ -95,8 +93,8 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("vinicola_token");
     setIsAuthenticated(false);
-    setCurrentView("login");
     setLotes([]);
+    navigate("/");
   };
 
   const handleAddLote = async (newLote) => {
@@ -157,35 +155,51 @@ function App() {
     }
   };
 
-  const handleViewLote = (lote) => {
-    setSelectedLote(lote);
-    setCurrentView("client");
+  // Protected Route Wrapper
+  const RequireAuth = ({ children }) => {
+    if (isLoading) return null; // Or a spinner
+    return isAuthenticated ? children : <Navigate to="/" replace />;
   };
-
-  const handleCloseClientView = () => {
-    setCurrentView(isAuthenticated ? "admin" : "login");
-    setSelectedLote(null);
-  };
-
-  if (currentView === "login") {
-    return <LoginPage onLogin={handleLogin} isLoading={isLoading} />;
-  }
-
-  if (currentView === "client" && selectedLote) {
-    return <ClientView lote={selectedLote} onClose={handleCloseClientView} />;
-  }
 
   return (
-    <AdminPanel
-      lotes={lotes}
-      onAddLote={handleAddLote}
-      onUpdateLote={handleUpdateLote}
-      onDeleteLote={handleDeleteLote}
-      onViewLote={handleViewLote}
-      onLogout={handleLogout}
-      isLoading={isLoading}
-      error={error}
-    />
+    <Routes>
+      <Route 
+        path="/" 
+        element={
+          isAuthenticated ? (
+            <Navigate to="/admin" replace />
+          ) : (
+            <LoginPage onLogin={handleLogin} isLoading={isLoading} />
+          )
+        } 
+      />
+      <Route 
+        path="/admin" 
+        element={
+          <RequireAuth>
+            <AdminPanel
+              lotes={lotes}
+              onAddLote={handleAddLote}
+              onUpdateLote={handleUpdateLote}
+              onDeleteLote={handleDeleteLote}
+              onLogout={handleLogout}
+              isLoading={isLoading}
+              error={error}
+            />
+          </RequireAuth>
+        } 
+      />
+      <Route path="/vinho/:id" element={<PublicLoteView />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

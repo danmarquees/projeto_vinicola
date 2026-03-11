@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 // O componente QRCodeModal foi modificado para usar uma API online, resolvendo o erro de dependência.
 const QRCodeModal = ({ url, onClose }) => {
@@ -161,11 +162,11 @@ const AdminPanel = ({
   onAddLote,
   onUpdateLote,
   onDeleteLote,
-  onViewLote,
   onLogout,
   isLoading,
   error,
 }) => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLote, setEditingLote] = useState(null);
@@ -405,7 +406,7 @@ const AdminPanel = ({
                         QR
                       </button>
                       <button
-                        onClick={() => onViewLote(lote)}
+                        onClick={() => navigate(`/vinho/${lote.id}`)}
                         className="text-rose-700 hover:text-rose-900 transition font-bold"
                       >
                         Ver Detalhes
