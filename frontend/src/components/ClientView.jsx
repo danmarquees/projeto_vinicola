@@ -1,6 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const ClientView = ({ lote, onClose }) => {
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
   // Efeito para registrar leituras passivas do QR Code (Analytics)
   useEffect(() => {
     if (lote && lote.id) {
@@ -26,6 +31,39 @@ const ClientView = ({ lote, onClose }) => {
       </div>
     );
   }
+
+  const handleRatingSubmit = async (e) => {
+    e.preventDefault();
+    if (rating === 0) {
+      setSubmitMessage({ type: 'error', text: 'Por favor, selecione uma nota de 1 a 5 estrelas.' });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitMessage({ type: '', text: '' });
+    
+    try {
+      const response = await fetch("/api/avaliacoes/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lote_vinho: lote.id,
+          estrelas: rating,
+          comentario: comment,
+        })
+      });
+      
+      if (!response.ok) throw new Error("Erro ao enviar avaliação.");
+      
+      setSubmitMessage({ type: 'success', text: 'Obrigado pela sua avaliação! Um brinde!' });
+      setRating(0);
+      setComment("");
+    } catch (error) {
+      setSubmitMessage({ type: 'error', text: 'Não foi possível enviar sua avaliação no momento.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Lógica Dinâmica de Cores (Tinto vs Branco)
   const isWhiteWine = lote.variedade_uva &&
@@ -181,6 +219,74 @@ const ClientView = ({ lote, onClose }) => {
               <span className={`text-6xl ${themeTheme.quoteColor} font-serif leading-none mt-2`}>"</span>
               <p className="text-lg leading-relaxed text-stone-700 pt-3">{lote.notas_degustacao}</p>
             </div>
+          </section>
+
+          {/* Avaliação Section */}
+          <section className="animate-in slide-in-from-bottom-5 fade-in duration-700 delay-500 fill-mode-both mt-16 pt-12 border-t border-stone-100 relative z-10 text-center">
+            <div className={`w-12 h-1 bg-gradient-to-r ${themeTheme.bgGradient} mx-auto mb-8 rounded-full`}></div>
+            <h3 className={`text-2xl ${isWhiteWine ? 'text-amber-950' : 'text-rose-950'} mb-4`} style={{ fontFamily: '"Playfair Display", serif' }}>
+              O que achou deste vinho?
+            </h3>
+            <p className="text-stone-500 mb-8 max-w-md mx-auto">Sua opinião é fundamental para aprimorarmos nossa jornada enológica. Deixe sua avaliação abaixo.</p>
+            
+            <form onSubmit={handleRatingSubmit} className="max-w-xl mx-auto bg-stone-50/50 p-8 rounded-3xl border border-stone-100 shadow-sm transition-all hover:shadow-md relative overflow-hidden">
+              {submitMessage.type === 'success' && (
+                <div className="absolute inset-0 bg-white/95 backdrop-blur flex flex-col items-center justify-center z-20 animate-in fade-in zoom-in duration-500">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h4 className={`text-xl font-bold text-stone-800 mb-2`} style={{ fontFamily: '"Playfair Display", serif' }}>Saúde!</h4>
+                  <p className="text-stone-600 max-w-xs">{submitMessage.text}</p>
+                  <button onClick={() => setSubmitMessage({type: '', text: ''})} className="mt-6 text-sm font-semibold text-rose-900 uppercase tracking-widest hover:text-rose-700 transition">Avaliar Novamente</button>
+                </div>
+              )}
+
+              <div className="flex justify-center gap-2 mb-8">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="focus:outline-none transition-transform hover:scale-110 p-1"
+                  >
+                    <svg 
+                      className={`w-10 h-10 transition-colors duration-200 ${(hoverRating || rating) >= star ? 'text-amber-400 drop-shadow-sm' : 'text-stone-200'}`} 
+                      fill="currentColor" 
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="relative mb-6">
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Conte-nos sua experiência com este lote..."
+                  className="w-full px-5 py-4 border border-stone-200 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 outline-none transition-all min-h-[120px] resize-y bg-white/70 backdrop-blur-sm shadow-inner text-stone-700"
+                />
+              </div>
+              
+              {submitMessage.type === 'error' && (
+                <div className="p-4 rounded-xl mb-6 text-sm font-medium bg-red-50 text-red-800 border border-red-200">
+                  {submitMessage.text}
+                </div>
+              )}
+              
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full py-4 px-6 rounded-2xl font-bold tracking-wide text-white shadow-md transition-all ${isSubmitting ? 'opacity-70 bg-stone-400 cursor-not-allowed' : 'bg-gradient-to-r from-stone-900 to-stone-800 hover:shadow-lg hover:-translate-y-0.5 border border-stone-700'}`}
+              >
+                {isSubmitting ? 'Enviando Avaliação...' : 'Enviar Avaliação'}
+              </button>
+            </form>
           </section>
         </div>
       </main>
