@@ -166,6 +166,7 @@ const AdminPanel = ({
   isLoading,
   error,
 }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLote, setEditingLote] = useState(null);
   const [formData, setFormData] = useState({
@@ -244,13 +245,21 @@ const AdminPanel = ({
   };
 
   return (
-    <div className="min-h-screen flex bg-[#fbfaf9] font-sans text-stone-800 selection:bg-rose-200">
+    <div className="min-h-screen flex bg-[#fbfaf9] font-sans text-stone-800 selection:bg-rose-200 overflow-hidden">
       {isQrModalOpen && (
         <QRCodeModal url={qrCodeUrl} onClose={() => setQrModalOpen(false)} />
       )}
 
+      {/* Overlay do menu mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 sm:hidden transition-opacity" 
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar - Premium Dark Mode */}
-      <aside className="w-72 bg-stone-950 text-stone-300 flex-col hidden sm:flex shadow-2xl z-10 relative">
+      <aside className={`fixed inset-y-0 left-0 z-40 transform ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:flex w-72 bg-stone-950 text-stone-300 flex-col transition-transform duration-300 ease-in-out shadow-2xl`}>
         <div className="absolute inset-0 bg-gradient-to-b from-rose-950/40 to-black/80 pointer-events-none"></div>
         <div className="h-24 flex items-center justify-center bg-black/60 border-b border-rose-950/50 relative z-10">
           <WineIcon className="w-8 h-8 text-rose-500 mr-3" />
@@ -284,20 +293,31 @@ const AdminPanel = ({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto w-full relative">
+      <main className="flex-1 p-4 sm:p-10 lg:p-12 h-screen overflow-y-auto w-full relative">
         {/* Subtle background graphic */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-rose-100/40 rounded-full blur-[120px] pointer-events-none -mr-20 -mt-20"></div>
 
-        <header className="flex justify-between items-end mb-10 relative z-10">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
-              Lotes de Vinho
-            </h2>
-            <p className="text-stone-500 mt-2 font-light">Gerencie sua produção e rastreabilidade.</p>
+        <header className="flex flex-col sm:flex-row justify-between sm:items-end mb-6 sm:mb-10 relative z-10 gap-4">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="sm:hidden p-2 -ml-2 text-stone-600 hover:text-stone-900 bg-stone-200/50 rounded-xl transition-colors"
+                aria-label="Toggle Menu"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
+                Lotes de Vinho
+              </h2>
+            </div>
+            <p className="text-stone-500 mt-2 font-light text-sm sm:text-base hidden sm:block">Gerencie sua produção e rastreabilidade.</p>
           </div>
           <button
             onClick={openAddForm}
-            className="flex items-center space-x-2 bg-gradient-to-r from-rose-900 to-red-950 text-amber-50 px-6 py-3 rounded-xl shadow-[0_8px_16px_rgba(159,18,57,0.25)] hover:shadow-[0_12px_24px_rgba(159,18,57,0.35)] transition-all duration-300 transform hover:-translate-y-0.5 border border-rose-800/30"
+            className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-rose-900 to-red-950 text-amber-50 px-6 py-3 rounded-xl shadow-[0_8px_16px_rgba(159,18,57,0.25)] hover:shadow-[0_12px_24px_rgba(159,18,57,0.35)] transition-all duration-300 transform hover:-translate-y-0.5 border border-rose-800/30"
           >
             <AddIcon />
             <span className="font-semibold tracking-wide">Novo Lote</span>
@@ -319,8 +339,8 @@ const AdminPanel = ({
             <p className="text-stone-500 font-medium">Sincronizando lotes...</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-stone-100 overflow-hidden relative z-10">
-            <table className="w-full text-left border-collapse">
+          <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-stone-100 overflow-x-auto relative z-10 min-w-full">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-stone-50/80 border-b border-stone-100">
                   <th className="px-8 py-5 text-xs font-bold text-stone-500 uppercase tracking-widest">
@@ -401,8 +421,8 @@ const AdminPanel = ({
 
       {/* Formulário Modal para Adicionar/Editar Lote */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-stone-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-2xl transform transition-all border border-stone-200">
+        <div className="fixed inset-0 bg-stone-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl transform transition-all border border-stone-200 overflow-y-auto max-h-[95vh]">
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h3 className="text-3xl font-extrabold text-stone-900 tracking-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
@@ -505,17 +525,17 @@ const AdminPanel = ({
                   rows="4"
                 ></textarea>
               </div>
-              <div className="flex justify-end mt-8 space-x-4">
+              <div className="flex flex-col sm:flex-row justify-end mt-8 space-y-3 sm:space-y-0 sm:space-x-4">
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="px-6 py-2.5 font-semibold text-stone-600 bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 font-semibold text-stone-600 bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors order-2 sm:order-1"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-2.5 font-bold text-amber-50 bg-gradient-to-r from-rose-900 to-red-950 rounded-xl shadow-[0_4px_10px_rgba(159,18,57,0.3)] hover:shadow-[0_8px_15px_rgba(159,18,57,0.4)] transition-all"
+                  className="w-full sm:w-auto px-8 py-3 font-bold text-amber-50 bg-gradient-to-r from-rose-900 to-red-950 rounded-xl shadow-[0_4px_10px_rgba(159,18,57,0.3)] hover:shadow-[0_8px_15px_rgba(159,18,57,0.4)] transition-all order-1 sm:order-2"
                 >
                   Salvar Lote
                 </button>
