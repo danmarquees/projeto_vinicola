@@ -1,14 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap');
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
+  /* Premium Color Palette */
+  --color-bordeaux: #4A0E0E;
+  --color-bordeaux-light: #6B1A1A;
+  --color-champagne: #F7E7CE;
+  --color-champagne-dark: #E6D5B8;
+  --color-charcoal: #1A1A1A;
+  --color-gold: #D4AF37;
+  --color-rosé: #E9D5DA;
+  
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #f9fafb;
-  /* Lighter background for the rest of the app */
+  color: var(--color-charcoal);
+  background-color: #fdfcfb;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,61 +25,54 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+@theme {
+  --color-bordeaux: var(--color-bordeaux);
+  --color-champagne: var(--color-champagne);
+  --color-charcoal: var(--color-charcoal);
+  --color-gold: var(--color-gold);
 }
 
-a:hover {
-  color: #535bf2;
+.font-serif {
+  font-family: 'Playfair Display', serif;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #fdfcfb;
+  color: var(--color-charcoal);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-button:hover {
-  border-color: #646cff;
+::-webkit-scrollbar-thumb {
+  background: #4A0E0E;
+  border-radius: 10px;
 }
 
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+::-webkit-scrollbar-thumb:hover {
+  background: #6B1A1A;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
 
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
+.glass-dark {
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

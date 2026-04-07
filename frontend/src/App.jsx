@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 
 const LoginPage = lazy(() => import("./components/LoginPage"));
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
@@ -8,7 +9,7 @@ const PublicLoteView = lazy(() => import("./components/PublicLoteView"));
 // Componente para ícone de carregamento (Spinner)
 const Spinner = () => (
   <svg
-    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+    className="animate-spin -ml-1 mr-3 h-5 w-5 text-bordeaux"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
@@ -35,6 +36,7 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("vinicola_token");
@@ -108,8 +110,8 @@ function AppContent() {
         },
         body: JSON.stringify({
           ...newLote,
-          quantidade_produzida_inicial: 100,
-          quantidade_em_estoque: 100
+          quantidade_produzida_inicial: newLote.quantidade_produzida_inicial || 100,
+          quantidade_em_estoque: newLote.quantidade_em_estoque || 100
         })
       });
       if (!response.ok) throw new Error("Falha ao adicionar lote");
@@ -130,8 +132,8 @@ function AppContent() {
         },
         body: JSON.stringify({
           ...updatedData,
-          quantidade_produzida_inicial: 100,
-          quantidade_em_estoque: 100
+          quantidade_produzida_inicial: updatedData.quantidade_produzida_inicial || 100,
+          quantidade_em_estoque: updatedData.quantidade_em_estoque || 100
         })
       });
       if (!response.ok) throw new Error("Falha ao atualizar lote");
@@ -164,41 +166,43 @@ function AppContent() {
 
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fdfcfb]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
         <Spinner />
-        <p className="text-xl text-rose-900 font-medium tracking-wide mt-4">Carregando...</p>
+        <p className="text-xl text-stone-500 font-serif tracking-wide mt-4">Conectando à Adega...</p>
       </div>
     }>
-      <Routes>
-        <Route 
-          path="/" 
-          element={
-            isAuthenticated ? (
-              <Navigate to="/admin" replace />
-            ) : (
-              <LoginPage onLogin={handleLogin} isLoading={isLoading} />
-            )
-          } 
-        />
-        <Route 
-          path="/admin" 
-          element={
-            <RequireAuth>
-              <AdminPanel
-                lotes={lotes}
-                onAddLote={handleAddLote}
-                onUpdateLote={handleUpdateLote}
-                onDeleteLote={handleDeleteLote}
-                onLogout={handleLogout}
-                isLoading={isLoading}
-                error={error}
-              />
-            </RequireAuth>
-          } 
-        />
-        <Route path="/vinho/:id" element={<PublicLoteView />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route 
+            path="/" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/admin" replace />
+              ) : (
+                <LoginPage onLogin={handleLogin} isLoading={isLoading} />
+              )
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <RequireAuth>
+                <AdminPanel
+                  lotes={lotes}
+                  onAddLote={handleAddLote}
+                  onUpdateLote={handleUpdateLote}
+                  onDeleteLote={handleDeleteLote}
+                  onLogout={handleLogout}
+                  isLoading={isLoading}
+                  error={error}
+                />
+              </RequireAuth>
+            } 
+          />
+          <Route path="/vinho/:id" element={<PublicLoteView />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AnimatePresence>
     </Suspense>
   );
 }
