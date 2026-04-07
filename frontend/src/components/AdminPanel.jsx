@@ -13,7 +13,10 @@ import {
   X,
   Plus,
   AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  History
 } from "lucide-react";
 
 const QRCodeModal = ({ url, onClose }) => {
@@ -159,6 +162,52 @@ const AdminPanel = ({
     const url = `${window.location.origin}/vinho/${lote.id}`;
     setQrCodeUrl(url);
     setQrModalOpen(true);
+  };
+
+  const [movData, setMovData] = useState({ tipo: 'ENTRADA', quantidade: '', motivo: '' });
+
+  const handleStockAction = async () => {
+    if (!editingLote || !movData.quantidade) return;
+    const qtdNum = parseInt(movData.quantidade);
+    const newQtd = movData.tipo === 'ENTRADA' ? 
+      editingLote.quantidade_em_estoque + qtdNum : 
+      Math.max(0, editingLote.quantidade_em_estoque - qtdNum);
+    
+    const token = localStorage.getItem("vinicola_token");
+    const headers = { "Content-Type": "application/json", ...(token ? {Authorization: `Token ${token}`} : {}) };
+
+    try {
+      await fetch("/api/movimentacoes/", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ 
+          lote_vinho: editingLote.id, 
+          tipo: movData.tipo, 
+          quantidade: qtdNum, 
+          motivo: movData.motivo 
+        })
+      });
+
+      onUpdateLote(editingLote.id, { ...editingLote, quantidade_em_estoque: newQtd });
+      
+      const newMov = { 
+        id: Math.random().toString(), 
+        tipo: movData.tipo, 
+        quantidade: qtdNum, 
+        motivo: movData.motivo, 
+        data_movimentacao: new Date().toISOString() 
+      };
+
+      setEditingLote(prev => ({ 
+        ...prev, 
+        quantidade_em_estoque: newQtd,
+        movimentacoes: [newMov, ...(prev.movimentacoes || [])]
+      }));
+      setFormData(prev => ({ ...prev, quantidade_em_estoque: newQtd }));
+      setMovData({ tipo: 'ENTRADA', quantidade: '', motivo: '' });
+    } catch (err) {
+      alert("Falha ao registrar movimentação.");
+    }
   };
 
   const containerVariants = {
@@ -485,6 +534,65 @@ const AdminPanel = ({
                       <input name="sugestoes_harmonizacao" value={formData.sugestoes_harmonizacao} onChange={handleFormChange} placeholder="Harmonização (Ex: Carnes)" className="w-full px-5 py-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none" />
                     </div>
                   </div>
+
+                  {editingLote && (
+                    <div className="md:col-span-2 pt-6 border-t border-stone-100 bg-stone-50/50 p-6 rounded-3xl border border-stone-100">
+                      <h4 className="flex items-center gap-2 text-[10px] font-black text-stone-600 uppercase tracking-[0.3em] mb-6">
+                        <History className="w-4 h-4" /> Gestão de Estoque Rápida
+                      </h4>
+                      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                        <select 
+                          value={movData.tipo} 
+                          onChange={(e) => setMovData({...movData, tipo: e.target.value})}
+                          className="px-5 py-4 bg-white border border-stone-200 rounded-2xl outline-none font-bold text-xs"
+                        >
+                          <option value="ENTRADA">Entrada</option>
+                          <option value="SAIDA">Saída</option>
+                        </select>
+                        <input 
+                          type="number" 
+                          placeholder="Qtd" 
+                          value={movData.quantidade} 
+                          onChange={(e) => setMovData({...movData, quantidade: e.target.value})}
+                          className="w-24 px-5 py-4 bg-white border border-stone-200 rounded-2xl outline-none"
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Motivo (Opcional)" 
+                          value={movData.motivo} 
+                          onChange={(e) => setMovData({...movData, motivo: e.target.value})}
+                          className="flex-1 px-5 py-4 bg-white border border-stone-200 rounded-2xl outline-none"
+                        />
+                        <button 
+                          type="button" 
+                          onClick={handleStockAction}
+                          className={`px-6 py-4 rounded-2xl font-bold flex items-center gap-2 text-white shadow-md transition-colors text-xs tracking-wider ${movData.tipo === 'ENTRADA' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}
+                        >
+                          {movData.tipo === 'ENTRADA' ? <ArrowUpCircle className="w-4 h-4"/> : <ArrowDownCircle className="w-4 h-4"/>}
+                          Lançar
+                        </button>
+                      </div>
+
+                      {editingLote.movimentacoes && editingLote.movimentacoes.length > 0 && (
+                        <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
+                          {editingLote.movimentacoes.map(mov => (
+                            <div key={mov.id} className="flex justify-between items-center text-sm p-3 bg-white border border-stone-200 rounded-xl">
+                              <div className="flex items-center gap-3">
+                                {mov.tipo === 'ENTRADA' ? <ArrowUpCircle className="w-4 h-4 text-emerald-500" /> : <ArrowDownCircle className="w-4 h-4 text-red-500" />}
+                                <div>
+                                  <span className="font-bold">{mov.quantidade} garrafas</span>
+                                  <span className="text-stone-500 ml-2">{mov.motivo}</span>
+                                </div>
+                              </div>
+                              <span className="text-[10px] text-stone-400 font-mono">
+                                {new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-1">Notas de Degustação</label>

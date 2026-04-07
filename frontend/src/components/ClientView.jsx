@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import { 
   Thermometer, 
   Clock, 
@@ -12,7 +14,9 @@ import {
   Calendar,
   CheckCircle2,
   Droplet,
-  Wine
+  Wine,
+  Share2,
+  Download
 } from "lucide-react";
 
 const ClientView = ({ lote, onClose }) => {
@@ -24,17 +28,67 @@ const ClientView = ({ lote, onClose }) => {
   
   useEffect(() => {
     if (lote && lote.id) {
-      fetch("/api/scans/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lote: lote.id,
-          tipo_leitura: "QR_CODE",
-          detalhes_dispositivo: navigator.userAgent
-        })
-      }).catch(err => console.error("Erro analítico silencioso:", err));
+      const sendScan = (lat, lng) => {
+        fetch("/api/scans/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lote_vinho: lote.id,
+            user_agent: navigator.userAgent,
+            latitude: lat,
+            longitude: lng
+          })
+        }).catch(err => console.error("Erro analítico silencioso:", err));
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => sendScan(pos.coords.latitude, pos.coords.longitude),
+          (err) => sendScan(null, null)
+        );
+      } else {
+        sendScan(null, null);
+      }
     }
   }, [lote]);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Adega Virtual: ${lote.nome_lote}`,
+          text: 'Descubra a história e as notas degustativas deste vinho excepcional.',
+          url: url,
+        });
+      } catch (err) {
+        console.log("Compartilhamento cancelado ou falhou.");
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link da Ficha copiado para a área de transferência!");
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsSubmitting(true);
+    const element = document.getElementById("ficha-tecnica-capture");
+    if (!element) return;
+    try {
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#1A1A1A" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${lote.nome_lote.replace(/ /g, '_')}.pdf`);
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao exportar PDF.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!lote) {
     return (
@@ -145,10 +199,28 @@ const ClientView = ({ lote, onClose }) => {
             <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme.accent}`}>Lote</span>
             <span className="text-sm font-mono opacity-80">{String(lote.id).split('-')[0]}</span>
           </div>
+
+          {/* Social / Export Actions */}
+          <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.5 }}
+             className="flex gap-4 justify-center mt-8"
+             data-html2canvas-ignore="true"
+          >
+            <button onClick={handleShare} className={`flex items-center gap-2 px-5 py-3 rounded-xl border ${theme.cardBorder} glass hover:bg-white/10 transition group`}>
+              <Share2 className={`w-4 h-4 ${theme.accent} group-hover:scale-110 transition`} />
+              <span className={`text-[10px] font-black tracking-widest uppercase ${theme.text}`}>Compartilhar</span>
+            </button>
+            <button onClick={handleDownloadPDF} className={`flex items-center gap-2 px-5 py-3 rounded-xl border ${theme.cardBorder} glass hover:bg-white/10 transition group`}>
+              <Download className={`w-4 h-4 ${theme.accent} group-hover:-translate-y-1 transition`} />
+              <span className={`text-[10px] font-black tracking-widest uppercase ${theme.text}`}>Baixar Ficha</span>
+            </button>
+          </motion.div>
         </motion.div>
       </header>
 
-      <main className="relative z-20 max-w-4xl mx-auto px-4 sm:px-8 pb-32 space-y-12 sm:space-y-24">
+      <main id="ficha-tecnica-capture" className="relative z-20 max-w-4xl mx-auto px-4 sm:px-8 pb-32 space-y-12 sm:space-y-24">
         
         {/* The Origin */}
         <section>

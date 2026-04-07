@@ -123,6 +123,8 @@ class ScanEvento(models.Model):
     timestamp_scan = models.DateTimeField(auto_now_add=True, verbose_name="Data/Hora do Scan")
     ip_address = models.GenericIPAddressField(blank=True, null=True, verbose_name="Endereço IP")
     user_agent = models.TextField(blank=True, null=True, verbose_name="User Agent")
+    latitude = models.FloatField(blank=True, null=True, verbose_name="Latitude")
+    longitude = models.FloatField(blank=True, null=True, verbose_name="Longitude")
 
     class Meta:
         verbose_name = "Evento de Scan de QR Code"
@@ -131,3 +133,23 @@ class ScanEvento(models.Model):
 
     def __str__(self):
         return f"Scan do lote {self.lote_vinho.nome_lote} em {self.timestamp_scan:%d/%m/%Y %H:%M}"
+
+class MovimentacaoEstoque(models.Model):
+    TIPO_MOVIMENTACAO = [
+        ('ENTRADA', 'Entrada'),
+        ('SAIDA', 'Saída / Venda / Consumo')
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lote_vinho = models.ForeignKey(LoteDeVinho, on_delete=models.CASCADE, related_name="movimentacoes")
+    tipo = models.CharField(max_length=10, choices=TIPO_MOVIMENTACAO, verbose_name="Tipo de Movimentação")
+    quantidade = models.PositiveIntegerField(verbose_name="Quantidade")
+    motivo = models.CharField(max_length=255, blank=True, null=True, verbose_name="Motivo / Justificativa")
+    data_movimentacao = models.DateTimeField(auto_now_add=True, verbose_name="Data da Movimentação")
+
+    class Meta:
+        verbose_name = "Movimentação de Estoque"
+        verbose_name_plural = "Movimentações de Estoque"
+        ordering = ['-data_movimentacao']
+
+    def __str__(self):
+        return f"{self.tipo} de {self.quantidade} un. - {self.lote_vinho.nome_lote}"

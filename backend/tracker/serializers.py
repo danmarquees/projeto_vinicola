@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import LoteDeVinho, AvaliacaoCliente, ScanEvento
+from .models import LoteDeVinho, AvaliacaoCliente, ScanEvento, MovimentacaoEstoque
 
 class AvaliacaoClienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,8 +11,14 @@ class ScanEventoSerializer(serializers.ModelSerializer):
         model = ScanEvento
         fields = '__all__'
 
+class MovimentacaoEstoqueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MovimentacaoEstoque
+        fields = '__all__'
+
 class LoteDeVinhoSerializer(serializers.ModelSerializer):
     avaliacoes = AvaliacaoClienteSerializer(many=True, read_only=True)
+    movimentacoes = MovimentacaoEstoqueSerializer(many=True, read_only=True)
     media_estrelas = serializers.SerializerMethodField()
 
     class Meta:
